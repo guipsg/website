@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0d0820" />
+    <title>Corrida da Sorte · Controle</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="pad">
+    <div class="topbar" id="topbar" hidden>
+      <span class="badge" id="badge"></span>
+      <span class="coins" id="coins"></span>
+      <span class="items" id="items"></span>
+    </div>
+
+    <main class="pad-main">
+      <!-- Digitar código -->
+      <div id="join" style="display:none">
+        <h1 class="pad-title title">🎲 CORRIDA DA SORTE</h1>
+        <p class="pad-msg">Digite o código que aparece na tela do computador</p>
+        <input class="code-input" id="code" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+        <button class="btn big" id="join-btn">Entrar</button>
+      </div>
+
+      <!-- Mensagem / pergunta -->
+      <div id="view" style="display:contents">
+        <h1 class="pad-title" id="title">Conectando…</h1>
+        <p class="pad-msg" id="text"></p>
+        <div class="options" id="options"></div>
+      </div>
+    </main>
+
+    <script src="../game/vendor/peerjs.min.js"></script>
+    <script src="controller.js"></script>
+  </body>
+</html>

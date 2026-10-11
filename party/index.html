@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Corrida da Sorte</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="stage"><canvas id="board"></canvas></div>
+
+    <!-- Lobby -->
+    <div class="overlay show" id="ov-lobby">
+      <div class="panel">
+        <h1 class="title">🎲 CORRIDA DA SORTE</h1>
+        <p class="subtitle">Jogo de tabuleiro por turnos para 2 jogadores · use o celular como controle</p>
+        <div class="lobby-grid">
+          <div id="qr">Gerando QR code…</div>
+          <div>
+            <div>Aponte a câmera do celular para o QR code ou abra o link e digite o código:</div>
+            <div class="code" id="room-code">····</div>
+            <div class="url" id="room-url"></div>
+            <div class="net-status" id="net-status">Conectando ao servidor de pareamento…</div>
+            <div class="slots">
+              <div class="slot" data-i="0"><b>Jogador 1</b><span>aguardando…</span></div>
+              <div class="slot" data-i="1"><b>Jogador 2</b><span>aguardando…</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hint">
+          Sem celular? Entre pelo teclado: <kbd>Espaço</kbd> = Jogador ⌨ A (responde com <kbd>1</kbd>…<kbd>7</kbd>) ·
+          <kbd>Enter</kbd> = Jogador ⌨ B (responde com <kbd>Z</kbd> <kbd>X</kbd> <kbd>C</kbd> <kbd>V</kbd> <kbd>B</kbd> <kbd>N</kbd> <kbd>M</kbd>)
+        </div>
+      </div>
+    </div>
+
+    <!-- Escolha de modo -->
+    <div class="overlay" id="ov-menu">
+      <div class="panel">
+        <h1 class="title">ESCOLHA O MODO</h1>
+        <p class="subtitle">Qualquer jogador pode escolher pelo celular</p>
+        <div class="modes">
+          <div class="mode versus">
+            <h3>🏆 Competição</h3>
+            <p>Corrida até a bandeira 🏁. Junte moedas, compre itens na loja, atrapalhe o rival com raios e ladrões e vença os minigames. Quem chegar primeiro ganha!</p>
+            <div class="key">Teclado: <kbd>1</kbd> / <kbd>Z</kbd></div>
+          </div>
+          <div class="mode coop">
+            <h3>🤝 Cooperativo</h3>
+            <p>Um monstro 👹 está perseguindo vocês! Os dois precisam chegar à bandeira 🏁 antes de serem alcançados. Usem correntes, ímãs e os minigames para segurar o monstro.</p>
+            <div class="key">Teclado: <kbd>2</kbd> / <kbd>X</kbd></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../game/vendor/peerjs.min.js"></script>
+    <script src="../game/vendor/qrcode.js"></script>
+    <script src="host.js"></script>
+  </body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#05060f" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Neon Arena · Controle</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="pad">
+    <!-- Digitar código -->
+    <div class="screen" id="s-join">
+      <h1 class="pad-title title">NEON ARENA</h1>
+      <p class="pad-msg">Digite o código que aparece na tela do computador</p>
+      <input class="code-input" id="code" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+      <button class="btn primary" id="join-btn">Entrar</button>
+    </div>
+
+    <!-- Mensagens de estado (conectando, aguardando, sala cheia…) -->
+    <div class="screen" id="s-msg">
+      <span class="badge" id="msg-badge" hidden></span>
+      <h1 class="pad-title" id="msg-title">Conectando…</h1>
+      <p class="pad-msg" id="msg-text"></p>
+      <button class="btn" id="msg-btn" hidden></button>
+    </div>
+
+    <!-- Escolha de modo -->
+    <div class="screen" id="s-menu">
+      <span class="badge" id="menu-badge"></span>
+      <h1 class="pad-title">Escolha o modo</h1>
+      <button class="btn versus" data-cmd="versus">⚔ Competição<small>Duelo: primeiro a 5 abates vence</small></button>
+      <button class="btn coop" data-cmd="coop">🛡 Cooperativo<small>Sobrevivam às ondas juntos</small></button>
+    </div>
+
+    <!-- Pausa / fim de jogo -->
+    <div class="screen" id="s-over">
+      <span class="badge" id="over-badge"></span>
+      <h1 class="pad-title" id="over-title">Fim de jogo</h1>
+      <p class="pad-msg" id="over-text"></p>
+      <button class="btn primary" id="over-main"></button>
+      <button class="btn" data-cmd="menu">Menu</button>
+    </div>
+
+    <!-- Gamepad -->
+    <div class="screen" id="s-pad">
+      <div class="pad-top">
+        <span class="badge" id="pad-badge"></span>
+        <span class="hearts" id="hearts"></span>
+        <span id="pad-score"></span>
+        <button class="pause" data-cmd="pause">❚❚</button>
+      </div>
+      <div class="pad-area">
+        <div class="zone" id="zone-move">
+          <div class="stick-base"></div><div class="stick-knob"></div>
+          <div class="zone-label">MOVER</div>
+        </div>
+        <div class="zone" id="zone-aim">
+          <div class="stick-base"></div><div class="stick-knob"></div>
+          <div class="zone-label">MIRAR + ATIRAR</div>
+        </div>
+        <button class="dash" id="dash">DASH</button>
+      </div>
+      <div class="rotate-hint">Dica: gire o celular para a horizontal</div>
+    </div>
+
+    <script src="vendor/peerjs.min.js"></script>
+    <script src="controller.js"></script>
+  </body>
+</html>

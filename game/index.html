@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neon Arena</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="stage"><canvas id="game"></canvas></div>
+
+    <!-- Lobby: QR code + código da sala -->
+    <div class="overlay show" id="ov-lobby">
+      <div class="panel">
+        <h1 class="title">NEON ARENA</h1>
+        <p class="subtitle">Arcade para 2 jogadores · use o celular como controle</p>
+        <div class="lobby-grid">
+          <div id="qr">Gerando QR code…</div>
+          <div>
+            <div>Aponte a câmera do celular para o QR code ou abra o link e digite o código:</div>
+            <div class="code" id="room-code">····</div>
+            <div class="url" id="room-url"></div>
+            <div class="net-status" id="net-status">Conectando ao servidor de pareamento…</div>
+            <div class="slots">
+              <div class="slot" data-i="0"><b>Jogador 1</b><span>aguardando…</span></div>
+              <div class="slot" data-i="1"><b>Jogador 2</b><span>aguardando…</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hint">
+          Sem celular? Entre pelo teclado: <kbd>Espaço</kbd> (WASD + Espaço + Shift esq.) ou
+          <kbd>Enter</kbd> (setas + Enter + Shift dir.)
+        </div>
+      </div>
+    </div>
+
+    <!-- Escolha de modo -->
+    <div class="overlay" id="ov-menu">
+      <div class="panel">
+        <h1 class="title">ESCOLHA O MODO</h1>
+        <p class="subtitle">Qualquer jogador pode escolher pelo celular</p>
+        <div class="modes">
+          <div class="mode versus">
+            <h3>⚔ Competição</h3>
+            <p>Duelo na arena. Cada abate vale 1 ponto — quem chegar a 5 primeiro vence. Pegue power-ups e use o dash para desviar.</p>
+            <div class="key">Teclado: <kbd>1</kbd></div>
+          </div>
+          <div class="mode coop">
+            <h3>🛡 Cooperativo</h3>
+            <p>Sobrevivam juntos às ondas de inimigos e chefes. Se seu parceiro cair, fique perto dele para reanimá-lo. Se os dois caírem, acabou.</p>
+            <div class="key">Teclado: <kbd>2</kbd></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pausa -->
+    <div class="overlay" id="ov-pause">
+      <div class="panel">
+        <p class="big">PAUSADO</p>
+        <p class="stat-line" id="pause-reason"></p>
+        <div class="hint">Continue pelo celular ou <kbd>P</kbd> · Menu: <kbd>M</kbd></div>
+      </div>
+    </div>
+
+    <!-- Fim de jogo -->
+    <div class="overlay" id="ov-over">
+      <div class="panel">
+        <p class="big" id="over-title">FIM DE JOGO</p>
+        <div id="over-stats"></div>
+        <div class="hint">Jogar de novo pelo celular ou <kbd>R</kbd> · Menu: <kbd>M</kbd></div>
+      </div>
+    </div>
+
+    <script src="vendor/peerjs.min.js"></script>
+    <script src="vendor/qrcode.js"></script>
+    <script src="host.js"></script>
+  </body>
+</html>

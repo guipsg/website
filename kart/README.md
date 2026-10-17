@@ -53,3 +53,4 @@ Para trocar ou adicionar personagens, edite `characters.js`: nome, descrição, 
 - Pista gerada a partir de uma curva Catmull-Rom (`CONTROL` em `host.js`), com raio mínimo de curva maior que a distância do muro, para a geometria nunca se dobrar.
 - Física arcade em passo fixo de 120 Hz. A CPU segue a pista com "elástico" para manter a corrida disputada.
 - Conexão celular ↔ computador por WebRTC com [PeerJS](https://peerjs.com/), como nos outros jogos (`../game/vendor/`). O celular envia volante, pedais e item ~30×/s. Para usar um servidor PeerJS próprio, defina `window.KART_PEER_OPTS`.
+- **Cache:** o GitHub Pages deixa o navegador guardar os arquivos por ~10 min. Para que uma atualização não misture arquivos novos com antigos, `index.html`, `controller.html` e `host.js` carregam os arquivos com `?v=<versão>`. Ao publicar mudanças, troque esse valor (em todos os lugares em que ele aparece).

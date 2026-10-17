@@ -2,7 +2,7 @@
 // Corrida de kart 3D (three.js) em tela dividida para 2 jogadores, com 2–4 karts da CPU.
 // Os celulares mandam volante/acelerador/freio/item via WebRTC (PeerJS).
 import * as THREE from 'three';
-import { CHARACTERS, characterById } from './characters.js';
+import { CHARACTERS, characterById } from './characters.js?v=20261017b'; // ?v= força o navegador a baixar a versão nova (mude junto com o index.html)
 import { clone as cloneSkinned } from './vendor/addons/utils/SkeletonUtils.js';
 
 // ========================================================================

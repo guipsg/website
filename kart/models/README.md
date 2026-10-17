@@ -1,15 +1,18 @@
 # Modelos 3D dos personagens
 
-Coloque aqui os arquivos `.glb` (ou `.gltf`) dos personagens e aponte para eles em `../characters.js`:
+| Arquivo | Personagem | Origem |
+|---|---|---|
+| `mii-masculino.glb` | Mii Masculino (moletom laranja) | `Mii_Character_draco.glb` |
+| `mii-feminino.glb` | Mii Feminino (moletom rosa) | `Mii_Feminino_draco.glb` |
+
+Os dois são exportados do Blender (glTF, compressão Draco), com esqueleto e a animação "Wave".
+
+Para adicionar outro modelo, coloque o `.glb` aqui e aponte para ele em `../characters.js`:
 
 ```js
-model: { url: 'models/personagem-a.glb', scale: 1, rotationY: Math.PI, offsetY: 0 }
+model: { url: 'models/novo.glb', scale: 0.86, offsetY: 0.17, offsetZ: -0.45, rotationY: 0 }
 ```
 
-Recomendações para o modelo:
-
-- Altura de ~1,2 unidade (o kart tem ~2,2 de comprimento). Ajuste com `scale`.
-- Olhando para **+Z** (frente do kart); senão gire com `rotationY`.
-- Origem no assento; ajuste a altura com `offsetY`.
-- Low-poly e texturas pequenas (≤ 1024 px): a tela é renderizada duas vezes (tela dividida).
-- Se o arquivo não carregar, o jogo usa o placeholder e mostra um aviso no console.
+- O modelo deve olhar para **+Z**. Se não olhar, gire com `rotationY`.
+- Com o mesmo esqueleto dos Miis (`hips`, `thigh.L/R`, `shin.L/R`, `upperarm.L/R`, `forearm.L/R`…), o jogo senta o piloto sozinho. Para outros esqueletos, use `pose: false` e exporte o modelo já sentado.
+- Mantenha o arquivo leve (≤ 1 MB, texturas ≤ 1024 px), porque a tela é renderizada duas vezes (tela dividida) e há até 6 karts.

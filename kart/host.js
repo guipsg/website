@@ -3,6 +3,7 @@
 // Os celulares mandam volante/acelerador/freio/item via WebRTC (PeerJS).
 import * as THREE from 'three';
 import { CHARACTERS, characterById } from './characters.js';
+import { clone as cloneSkinned } from './vendor/addons/utils/SkeletonUtils.js';
 
 // ========================================================================
 // Configuração
@@ -22,7 +23,7 @@ const FINISH_GRACE = 20; // segundos que a corrida continua depois do 1º jogado
 const COOP_POINTS = [10, 7, 5, 3];
 
 const $ = (s) => document.querySelector(s);
-const testHooks = { autopilot: false }; // usado só pelos testes automatizados
+const testHooks = { autopilot: false, view: null }; // usado só pelos testes automatizados
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = (arr) => arr[(Math.random() * arr.length) | 0];
@@ -714,24 +715,100 @@ function buildDriver(char) {
   return g;
 }
 
-let gltfLoaderPromise = null;
-function loadCharacterModel(char, kartGroup, placeholder) {
+// ------------------------------------------------------------------------
+// Modelos 3D dos personagens (glTF/GLB, com suporte a compressão Draco)
+// ------------------------------------------------------------------------
+let loaderPromise = null;
+function getLoader() {
+  if (!loaderPromise) {
+    loaderPromise = Promise.all([
+      import('./vendor/addons/loaders/GLTFLoader.js'),
+      import('./vendor/addons/loaders/DRACOLoader.js'),
+    ]).then(([g, d]) => {
+      const loader = new g.GLTFLoader();
+      const draco = new d.DRACOLoader();
+      draco.setDecoderPath(new URL('./vendor/addons/libs/draco/', import.meta.url).href);
+      loader.setDRACOLoader(draco);
+      return loader;
+    });
+  }
+  return loaderPromise;
+}
+const modelCache = new Map(); // url -> Promise<gltf>
+function loadModel(url) {
+  if (!modelCache.has(url)) modelCache.set(url, getLoader().then((l) => l.loadAsync(url)));
+  return modelCache.get(url);
+}
+
+// Pose sentada para o rig dos Miis (ossos apontam no +Y local; o modelo olha para +Z).
+// Cada osso é apontado numa direção no espaço do modelo, dos pais para os filhos.
+// Os nomes vêm sem ponto porque o three.js remove "." dos nomes ("thigh.L" → "thighL").
+const SEAT_POSE = [
+  ['thighL', [0.1, -0.05, 1]],
+  ['thighR', [-0.1, -0.05, 1]],
+  ['shinL', [0, -1, 0.3]],
+  ['shinR', [0, -1, 0.3]],
+  ['footL', [0, 0.2, 1]],
+  ['footR', [0, 0.2, 1]],
+  ['upperarmL', [0.35, -0.55, 0.75]],
+  ['upperarmR', [-0.35, -0.55, 0.75]],
+  ['forearmL', [-0.3, 0.05, 1]],
+  ['forearmR', [0.3, 0.05, 1]],
+];
+// Ossos usados no aceno de comemoração (só a parte de cima, para continuar sentado)
+const WAVE_BONES = new Set(['spine', 'neck', 'head', 'shoulderL', 'upperarmL', 'forearmL', 'handL', 'shoulderR', 'upperarmR', 'forearmR', 'handR']);
+
+const _qa = new THREE.Quaternion();
+const _qb = new THREE.Quaternion();
+const _va = new THREE.Vector3();
+function aimBone(bone, dir) {
+  bone.updateWorldMatrix(true, false);
+  bone.getWorldQuaternion(_qa);
+  _va.set(0, 1, 0).applyQuaternion(_qa).normalize();
+  const delta = new THREE.Quaternion().setFromUnitVectors(_va, new THREE.Vector3(...dir).normalize());
+  const worldQ = delta.multiply(_qa);
+  bone.parent.getWorldQuaternion(_qb);
+  bone.quaternion.copy(_qb.invert().multiply(worldQ));
+  bone.updateWorldMatrix(false, true);
+}
+function applySeatPose(obj) {
+  obj.updateMatrixWorld(true);
+  for (const [name, dir] of SEAT_POSE) {
+    const bone = obj.getObjectByName(name);
+    if (bone && bone.parent) aimBone(bone, dir);
+  }
+}
+
+function loadCharacterModel(char, body, placeholder, kart) {
   const m = char.model;
   if (!m || !m.url) return;
-  if (!gltfLoaderPromise) {
-    gltfLoaderPromise = import('./vendor/addons/loaders/GLTFLoader.js').then((mod) => new mod.GLTFLoader());
-  }
-  gltfLoaderPromise.then((loader) => loader.loadAsync(m.url)).then((gltf) => {
-    const obj = gltf.scene;
-    obj.scale.setScalar(m.scale || 1);
-    obj.rotation.y = m.rotationY || 0;
-    obj.position.y = 0.35 + (m.offsetY || 0);
+  loadModel(m.url).then((gltf) => {
+    if (!body.parent || !body.parent.parent) return; // o kart já saiu da cena
+    const obj = cloneSkinned(gltf.scene); // clone com esqueleto próprio (vários karts podem usar o mesmo modelo)
+    if (m.pose !== false) applySeatPose(obj);
+    obj.traverse((o) => { if (o.isMesh) o.frustumCulled = false; }); // a pose muda o volume da malha
+    const holder = new THREE.Group();
+    holder.add(obj);
+    holder.scale.setScalar(m.scale || 1);
+    holder.rotation.y = m.rotationY || 0;
+    holder.position.set(0, m.offsetY || 0, m.offsetZ || 0);
     placeholder.visible = false;
-    kartGroup.add(obj);
+    body.add(holder);
+    const clip = gltf.animations.find((a) => /wave/i.test(a.name));
+    if (clip && kart) {
+      const tracks = clip.tracks.filter((t) => t.name.endsWith('.quaternion') && WAVE_BONES.has(t.name.slice(0, -'.quaternion'.length)));
+      if (tracks.length) {
+        kart.mixer = new THREE.AnimationMixer(obj);
+        kart.waveAction = kart.mixer.clipAction(new THREE.AnimationClip('wave-upper', clip.duration, tracks));
+      }
+    }
   }).catch((err) => console.warn('Não foi possível carregar o modelo de ' + char.name + ' (' + m.url + '). Usando placeholder.', err));
 }
 
-function buildKart(color, char) {
+// Carrega os modelos logo no início, para já estarem prontos na corrida
+for (const c of CHARACTERS) if (c.model && c.model.url) loadModel(c.model.url).catch(() => {});
+
+function buildKart(color, char, kart) {
   const root = new THREE.Group();
   const body = new THREE.Group(); // gira no "rodopio" e inclina nas curvas
   root.add(body);
@@ -747,11 +824,11 @@ function buildKart(color, char) {
   spoiler.position.set(0, 1.0, -1.15);
   const sPost = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.4, 0.12), dark);
   sPost.position.set(0, 0.78, -1.1);
-  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.6, 0.3), dark);
-  seat.position.set(0, 0.85, -0.55);
-  const steering = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.05, 6, 16), dark);
-  steering.position.set(0, 1.0, 0.45);
-  steering.rotation.x = -0.9;
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.45, 0.25), dark);
+  seat.position.set(0, 0.8, -0.78);
+  const steering = new THREE.Mesh(new THREE.TorusGeometry(0.17, 0.045, 6, 16), dark);
+  steering.position.set(0, 0.82, 0.08);
+  steering.rotation.x = -1.1;
   body.add(chassis, nose, bumper, spoiler, sPost, seat, steering);
   const wheelGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.34, 12);
   wheelGeo.rotateZ(Math.PI / 2);
@@ -766,7 +843,7 @@ function buildKart(color, char) {
   const driver = buildDriver(char);
   driver.position.set(0, 0.35, -0.35);
   body.add(driver);
-  loadCharacterModel(char, body, driver);
+  loadCharacterModel(char, body, driver, kart);
   // Chama do turbo
   const flame = new THREE.Mesh(new THREE.ConeGeometry(0.28, 1.1, 8), new THREE.MeshBasicMaterial({ color: '#fb923c', transparent: true, opacity: 0.85 }));
   flame.rotation.x = -Math.PI / 2;
@@ -821,8 +898,8 @@ function makeKart(opts) {
     lastBox: -1, padCd: 0,
     ai: { lane: rand(-3, 3), laneT: rand(1, 4), itemT: rand(1, 4), skill: opts.skill || 0.9, stuckT: 0 },
     prevGas: 0, startBoost: false,
-    mesh: buildKart(opts.color, char),
   };
+  k.mesh = buildKart(opts.color, char, k);
   if (opts.label) {
     const lbl = labelSprite(opts.label, opts.color);
     if (opts.human >= 0) lbl.layers.set(1 + opts.human); // não aparece na câmera do próprio jogador
@@ -835,7 +912,8 @@ function makeKart(opts) {
 function clearKarts() {
   for (const k of state.karts) {
     scene.remove(k.mesh.root);
-    k.mesh.root.traverse((o) => { if (o.geometry) o.geometry.dispose(); });
+    // Geometrias dos modelos .glb são compartilhadas pelo cache, então só descarta as do kart
+    k.mesh.root.traverse((o) => { if (o.geometry && !o.isSkinnedMesh) o.geometry.dispose(); });
   }
   state.karts = [];
   for (const h of state.hazards) scene.remove(h.mesh);
@@ -1111,6 +1189,7 @@ function updateKart(k, dt) {
     if (k.travel >= LAPS * N) {
       k.finished = true;
       k.finishTime = state.raceTime;
+      if (k.waveAction) k.waveAction.play(); // comemora acenando
       if (k.human >= 0) {
         sfx.finish();
         buzz(k.human, 500);
@@ -1221,6 +1300,7 @@ function updateHazards(dt) {
 function updateVisuals(dt, t) {
   for (const k of state.karts) {
     const m = k.mesh;
+    if (k.mixer && k.waveAction.isRunning()) k.mixer.update(dt);
     m.root.position.set(k.x, 0, k.z);
     m.root.rotation.y = k.heading;
     m.body.rotation.y = k.spin > 0 ? (1.25 - k.spin) * Math.PI * 3.2 : -k.steer * 0.18 * Math.min(1, Math.abs(k.speed) / 10);
@@ -1389,7 +1469,7 @@ async function pickFlow(mode) {
   status(0, 'escolhendo…');
   status(1, 'escolhendo…');
   const spec = {
-    title: 'Escolha seu piloto', text: '(Personagens provisórios — os definitivos chegam em breve!)', two: true,
+    title: 'Escolha seu piloto', text: 'Cada piloto tem um jeito de dirigir.', two: true,
     options: CHARACTERS.map((c) => ({ id: c.id, label: c.name, sub: c.tagline + ' — ' + c.desc, color: c.color, accent: c.accent })),
   };
   const picks = await Promise.all([0, 1].map((i) => ask(i, spec).then((id) => {
@@ -1569,8 +1649,9 @@ function frame(now) {
   } else {
     // Câmera aérea girando em volta da pista (lobby, menus e resultado)
     const a = elapsed * 0.06;
-    attractCam.position.set(40 + Math.cos(a) * 260, 120, 100 + Math.sin(a) * 260);
-    attractCam.lookAt(30, 0, 100);
+    const v = testHooks.view; // câmera fixa usada pelos testes
+    attractCam.position.set(...(v ? v.pos : [40 + Math.cos(a) * 260, 120, 100 + Math.sin(a) * 260]));
+    attractCam.lookAt(...(v ? v.look : [30, 0, 100]));
     attractCam.aspect = w / h;
     attractCam.updateProjectionMatrix();
     renderer.setViewport(0, 0, w, h);

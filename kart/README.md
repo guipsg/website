@@ -34,18 +34,20 @@ Quem está mais para trás recebe itens melhores.
 
 No lobby: `Espaço` = jogador ⌨ A (`W A S D` + `E` para item; menus com `1` `2`) e `Enter` = jogador ⌨ B (setas + `Shift direito` para item; menus com `9` `0`).
 
-## Personagens (placeholders)
+## Personagens
 
-Os dois pilotos atuais são **provisórios**: são formas simples com a letra A/B no peito. Para trocar pelos personagens definitivos:
+Os pilotos são dois **Miis** (`models/mii-masculino.glb` e `models/mii-feminino.glb`, com compressão Draco):
 
-1. Coloque os modelos `.glb` em `kart/models/` (ver `models/README.md`).
-2. Em `kart/characters.js`, preencha `model: { url: 'models/....glb', scale, rotationY, offsetY }` e ajuste nome, descrição, cores e atributos (`speed`, `accel`, `handling`).
+- **Mii Masculino** (moletom laranja): velocista, mais rápido nas retas e com curva mais aberta.
+- **Mii Feminino** (moletom rosa): equilibrada, acelera mais rápido e faz curvas mais fechadas.
 
-O jogo carrega os modelos sozinho (GLTFLoader do three.js). Se um modelo falhar, ele continua usando o placeholder. Para adicionar mais personagens, basta acrescentar itens na lista `CHARACTERS`.
+Os modelos vêm em pé. O jogo **senta o piloto no kart** girando os ossos do esqueleto (coxas para a frente, canelas para baixo e mãos no volante; ver `SEAT_POSE` em `host.js`). Quando o jogador cruza a linha de chegada, o piloto **acena**: o jogo usa a animação "Wave" do arquivo, mas só da cintura para cima.
+
+Para trocar ou adicionar personagens, edite `characters.js`: nome, descrição, cores, atributos (`speed`, `accel`, `handling`) e o bloco `model` (arquivo, escala e posição no assento). Novos modelos com o mesmo esqueleto dos Miis (`thigh.L`, `shin.L`, `upperarm.L`…) já sentam sozinhos. Modelos com outro esqueleto podem usar `pose: false` e vir sentados do Blender. Se um modelo não carregar, o jogo usa um boneco placeholder.
 
 ## Técnico
 
-- 3D com [three.js](https://threejs.org/) r160 (em `vendor/`, sem build), carregado como módulo ES.
+- 3D com [three.js](https://threejs.org/) r160 (em `vendor/`, sem build), carregado como módulo ES. Os modelos .glb são carregados com GLTFLoader + DRACOLoader e clonados com SkeletonUtils, porque vários karts podem usar o mesmo personagem.
 - Pista gerada a partir de uma curva Catmull-Rom (`CONTROL` em `host.js`), com raio mínimo de curva maior que a distância do muro, para a geometria nunca se dobrar.
 - Física arcade em passo fixo de 120 Hz. A CPU segue a pista com "elástico" para manter a corrida disputada.
 - Conexão celular ↔ computador por WebRTC com [PeerJS](https://peerjs.com/), como nos outros jogos (`../game/vendor/`). O celular envia volante, pedais e item ~30×/s. Para usar um servidor PeerJS próprio, defina `window.KART_PEER_OPTS`.

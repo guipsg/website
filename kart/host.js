@@ -2,7 +2,7 @@
 // Corrida de kart 3D (three.js) em tela dividida para 2 jogadores, com 2–4 karts da CPU.
 // Os celulares mandam volante/acelerador/freio/item via WebRTC (PeerJS).
 import * as THREE from 'three';
-import { CHARACTERS, characterById } from './characters.js?v=20261017b'; // ?v= força o navegador a baixar a versão nova (mude junto com o index.html)
+import { CHARACTERS, characterById } from './characters.js?v=20261017c'; // ?v= força o navegador a baixar a versão nova (mude junto com o index.html)
 import { clone as cloneSkinned } from './vendor/addons/utils/SkeletonUtils.js';
 
 // ========================================================================
@@ -140,6 +140,9 @@ function updateLobbyUI() {
     else if (s.type === 'kbB') label = '⌨ setas + Shift';
     el.querySelector('span').textContent = label;
   });
+  const n = slots.filter(slotReady).length;
+  const bar = document.querySelector('#ov-lobby .pick-name');
+  if (bar) bar.textContent = n === 2 ? 'Todos prontos! 🏁' : n === 1 ? '1 jogador conectado · falta 1' : 'Esperando os 2 jogadores entrarem…';
 }
 
 let token = 0;
@@ -1781,9 +1784,16 @@ async function resultsFlow(mode, picks) {
   let title, sub;
   const rows = ranked.map((k, n) => {
     const pts = mode === 'coop' ? COOP_POINTS[n] || 0 : null;
-    return '<tr class="' + (k.human >= 0 ? 'human' : '') + '"><td class="p">' + ordinal(n + 1) + '</td>' +
-      '<td><span class="swatch" style="background:' + k.color + '"></span>' + k.name + ' <span style="color:var(--muted)">· ' + k.char.name + '</span></td>' +
-      '<td class="t">' + (k.finished ? fmtTime(k.finishTime) : '—') + (pts !== null ? ' · ' + pts + ' pts' : '') + '</td></tr>';
+    const pic = portraits[k.char.id]
+      ? '<img alt="" src="' + portraits[k.char.id] + '">'
+      : '<span class="face" style="background:' + k.char.color + '">' + k.char.name.slice(0, 1) + '</span>';
+    const tag = k.human >= 0 ? '<i class="ptag-p p' + (k.human + 1) + '">' + (k.human + 1) + 'P</i>' : '';
+    return '<div class="res-row' + (k.human >= 0 ? ' human p' + (k.human + 1) : '') + '" style="--kc:' + k.color + ';animation-delay:' + (n * 0.08) + 's">' +
+      '<span class="res-pos pos' + (n + 1) + '">' + (n + 1) + '</span>' +
+      '<span class="res-pic">' + pic + '</span>' +
+      '<span class="res-name">' + tag + k.name + '<small>' + k.char.name + '</small></span>' +
+      '<span class="res-time">' + (k.finished ? fmtTime(k.finishTime) : '—') + '</span>' +
+      (pts !== null ? '<span class="res-pts">' + pts + ' pts</span>' : '') + '</div>';
   });
   if (mode === 'versus') {
     const w = p1.rank < p2.rank ? p1 : p2;
@@ -1800,7 +1810,7 @@ async function resultsFlow(mode, picks) {
   }
   $('#res-title').textContent = title;
   $('#res-sub').textContent = sub;
-  $('#res-table').innerHTML = rows.join('');
+  $('#res-list').innerHTML = rows.join('');
   setDriving(false);
   setScreen('results');
   sfx.finish();

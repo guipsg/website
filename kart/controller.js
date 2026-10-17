@@ -175,6 +175,16 @@
           requestWakeLock();
         }
         break;
+      case 'pick':
+        currentAsk = null;
+        driving = false;
+        resetInput();
+        show('s-pick');
+        $('#pk-chip').style.background = m.color || '#64748b';
+        $('#pk-name').textContent = m.name || '';
+        $('#pk-sub').textContent = m.sub || '';
+        $('#pk-ready').hidden = !m.ready;
+        break;
       case 'hud':
         $('#race-info').textContent = m.text || '';
         $('#item-ico').textContent = m.item || '🎁';
@@ -192,6 +202,15 @@
     vibrate(20);
     document.querySelectorAll('#options .btn').forEach((b) => { b.disabled = true; });
   }
+
+  // Direcional da seleção de piloto
+  document.querySelectorAll('[data-nav]').forEach((el) => {
+    el.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      send({ t: 'nav', d: el.dataset.nav });
+      vibrate(15);
+    });
+  });
 
   // ---------- Entrada da corrida ----------
   const input = { s: 0, g: 0, b: 0, i: 0 }; // i = contador de toques no botão de item

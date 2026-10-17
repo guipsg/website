@@ -44,8 +44,8 @@
           </div>
         </div>
         <div class="hint">
-          Sem celular? <kbd>Espaço</kbd> = teclado A (<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> + <kbd>E</kbd> item, menus com <kbd>1</kbd> <kbd>2</kbd>) ·
-          <kbd>Enter</kbd> = teclado B (setas + <kbd>Shift dir.</kbd> item, menus com <kbd>9</kbd> <kbd>0</kbd>)
+          Sem celular? <kbd>Espaço</kbd> = teclado A (<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> + <kbd>E</kbd> item/OK, <kbd>Q</kbd> voltar, menus com <kbd>1</kbd> <kbd>2</kbd>) ·
+          <kbd>Enter</kbd> = teclado B (setas + <kbd>Shift dir.</kbd> item/OK, <kbd>Backspace</kbd> voltar, menus com <kbd>9</kbd> <kbd>0</kbd>)
         </div>
       </div>
     </div>
@@ -70,16 +70,31 @@
       </div>
     </div>
 
-    <!-- Escolha de personagem -->
-    <div class="overlay" id="ov-pick">
-      <div class="panel">
-        <h1 class="title">ESCOLHA O PILOTO</h1>
-        <p class="subtitle">Cada jogador escolhe no próprio celular</p>
-        <div class="cards" id="pick-cards"></div>
-        <div class="pick-status">
-          <div data-i="0">Jogador 1: escolhendo…</div>
-          <div data-i="1">Jogador 2: escolhendo…</div>
+    <!-- Escolha de personagem (estilo Mario Kart) -->
+    <div class="overlay pick" id="ov-pick">
+      <div class="pick-layout">
+        <div class="pick-left">
+          <div class="pick-title">ESCOLHA O PILOTO</div>
+          <div class="pick-panel"><div class="pick-grid" id="pick-grid"></div></div>
+          <div class="pick-help">Celular: ◀ ▲ ▼ ▶ para mover · Ⓐ OK para confirmar · Ⓑ para voltar</div>
         </div>
+        <div class="pick-right">
+          <div class="pick-stage" data-i="0">
+            <span class="ptag-p">1P</span><span class="ok-badge">OK!</span>
+            <div class="view"></div>
+            <div class="pinfo"><div class="pname"></div><div class="ptag"></div><div class="pstats"></div></div>
+          </div>
+          <div class="pick-stage" data-i="1">
+            <span class="ptag-p">2P</span><span class="ok-badge">OK!</span>
+            <div class="view"></div>
+            <div class="pinfo"><div class="pname"></div><div class="ptag"></div><div class="pstats"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="pick-bottom">
+        <div class="pbtn back"><span class="key">Ⓑ</span> Voltar</div>
+        <div class="pick-name" id="pick-name"></div>
+        <div class="pbtn ok"><span class="key">Ⓐ</span> OK</div>
       </div>
     </div>
 

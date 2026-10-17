@@ -11,7 +11,7 @@ Corrida de kart **3D** (estilo Mario Kart) para **2 jogadores** em tela dividida
 
 1. Abra `kart/` no computador. Ele precisa de WebGL, que qualquer navegador atual tem.
 2. Cada jogador escaneia o QR code com o celular, ou abre `kart/controller.html` e digita o código.
-3. Escolham o modo e cada um escolhe o seu piloto.
+3. Escolham o modo. Na **tela de seleção de piloto** (no estilo Mario Kart), o celular vira um controle: use o **direcional ◀ ▲ ▼ ▶** para mover o seu cursor (1P/2P) pela grade, **Ⓐ OK** para confirmar e **Ⓑ Voltar** para desfazer a escolha ou, se ninguém confirmou, voltar ao menu de modo. À direita, o kart do piloto que está sob o seu cursor gira numa plataforma, com os atributos ao lado. Os dois jogadores podem escolher o mesmo piloto. Os quadrados "?" são vagas para os próximos personagens.
 4. Segure o celular **na horizontal**:
    - **⚡ ACELERAR** (botão grande à direita), **🛑 FREAR / RÉ** e **🎁 ITEM**.
    - **🎡 Volante**: arraste o volante da esquerda girando-o. Ele volta sozinho ao centro.
@@ -32,7 +32,7 @@ Quem está mais para trás recebe itens melhores.
 
 ### Sem celular
 
-No lobby: `Espaço` = jogador ⌨ A (`W A S D` + `E` para item; menus com `1` `2`) e `Enter` = jogador ⌨ B (setas + `Shift direito` para item; menus com `9` `0`).
+No lobby: `Espaço` = jogador ⌨ A (`W A S D` + `E` para item; menus com `1` `2`) e `Enter` = jogador ⌨ B (setas + `Shift direito` para item; menus com `9` `0`). Na seleção de piloto: A usa `W A S D`, `E` (OK) e `Q` (voltar); B usa as setas, `Enter` (OK) e `Backspace` (voltar).
 
 ## Personagens
 
@@ -42,6 +42,8 @@ Os pilotos são dois **Miis** (`models/mii-masculino.glb` e `models/mii-feminino
 - **Mii Feminino** (moletom rosa): equilibrada, acelera mais rápido e faz curvas mais fechadas.
 
 Os modelos vêm em pé. O jogo **senta o piloto no kart** girando os ossos do esqueleto (coxas para a frente, canelas para baixo e mãos no volante; ver `SEAT_POSE` em `host.js`). Quando o jogador cruza a linha de chegada, o piloto **acena**: o jogo usa a animação "Wave" do arquivo, mas só da cintura para cima.
+
+Os retratos da grade de seleção são gerados na hora a partir dos próprios modelos 3D, com um close no rosto. A grade tem 12 vagas (6 colunas, constante `PICK_COLS` em `host.js`) e cresce sozinha se houver mais personagens.
 
 Para trocar ou adicionar personagens, edite `characters.js`: nome, descrição, cores, atributos (`speed`, `accel`, `handling`) e o bloco `model` (arquivo, escala e posição no assento). Novos modelos com o mesmo esqueleto dos Miis (`thigh.L`, `shin.L`, `upperarm.L`…) já sentam sozinhos. Modelos com outro esqueleto podem usar `pose: false` e vir sentados do Blender. Se um modelo não carregar, o jogo usa um boneco placeholder.
 

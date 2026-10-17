@@ -194,6 +194,7 @@ function cancelAsks() {
   for (const s of slots) {
     if (s.pending) { const p = s.pending; s.pending = null; p.reject(ABORT); }
   }
+  if (pickState.waiter) { const w = pickState.waiter; pickState.waiter = null; w.reject(ABORT); }
 }
 function sleep(ms) {
   const t = token;
@@ -270,6 +271,7 @@ function onMessage(conn, m) {
   if (!s) return;
   s.lastSeen = performance.now();
   if (m.t === 'answer') answer(s.i, m.id, m.opt);
+  else if (m.t === 'nav') pickNav(s.i, String(m.d));
   else if (m.t === 'in') {
     s.input.s = clamp(+m.s || 0, -1, 1);
     s.input.g = m.g ? 1 : 0;
@@ -291,6 +293,7 @@ function join(conn, cid) {
   sendTo(s.i, { t: 'welcome', slot: s.i });
   if (s.pending) sendAsk(s.i);
   else if (state.screen === 'race') { s.driving = true; sendTo(s.i, { t: 'drive' }); s.lastItem = -1; }
+  else if (state.screen === 'pick') sendPickState(s.i);
   else sendTo(s.i, Object.assign({ t: 'idle' }, s.idle));
   slotsChanged();
 }
@@ -318,12 +321,20 @@ function slotsChanged() {
 // ========================================================================
 const keys = {};
 const ASK_KEYS = [['Digit1', 'Digit2', 'Digit3'], ['Digit9', 'Digit0', 'Minus']];
+// Seleção de piloto pelo teclado (como um controle: direcional + OK + voltar)
+const PICK_KEYS_A = { KeyA: 'left', KeyD: 'right', KeyW: 'up', KeyS: 'down', KeyE: 'ok', Space: 'ok', KeyQ: 'back' };
+const PICK_KEYS_B = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down', Enter: 'ok', NumpadEnter: 'ok', ShiftRight: 'ok', Backspace: 'back', Slash: 'back' };
 window.addEventListener('keydown', (e) => {
   if (e.repeat) return;
   keys[e.code] = true;
   if (state.screen === 'lobby') {
     if (e.code === 'Space') kbJoin('kbA');
     if (e.code === 'Enter' || e.code === 'NumpadEnter') kbJoin('kbB');
+  } else if (state.screen === 'pick') {
+    for (const s of slots) {
+      const map = s.type === 'kbA' ? PICK_KEYS_A : s.type === 'kbB' ? PICK_KEYS_B : null;
+      if (map && map[e.code]) pickNav(s.i, map[e.code]);
+    }
   } else if (e.code === 'Escape' && state.screen !== 'race') {
     for (const s of slots) if (s.type === 'kbA' || s.type === 'kbB') s.type = null;
     toLobby();
@@ -364,7 +375,7 @@ function readKeyboard(s, dt) {
 // Cena 3D
 // ========================================================================
 const canvas = $('#view');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 const scene = new THREE.Scene();
@@ -808,7 +819,7 @@ function loadCharacterModel(char, body, placeholder, kart) {
 // Carrega os modelos logo no início, para já estarem prontos na corrida
 for (const c of CHARACTERS) if (c.model && c.model.url) loadModel(c.model.url).catch(() => {});
 
-function buildKart(color, char, kart) {
+function buildKart(color, char, kart, target = scene) {
   const root = new THREE.Group();
   const body = new THREE.Group(); // gira no "rodopio" e inclina nas curvas
   root.add(body);
@@ -856,7 +867,7 @@ function buildKart(color, char, kart) {
   shadow.position.y = 0.03;
   shadow.scale.set(0.8, 1.2, 1);
   root.add(shadow);
-  scene.add(root);
+  target.add(root);
   return { root, body, wheels, flame, paint };
 }
 
@@ -1428,6 +1439,7 @@ function setScreen(s) {
   $('#ov-lobby').classList.toggle('show', s === 'lobby');
   $('#ov-menu').classList.toggle('show', s === 'menu');
   $('#ov-pick').classList.toggle('show', s === 'pick');
+  document.body.classList.toggle('picking', s === 'pick');
   $('#ov-results').classList.toggle('show', s === 'results');
   document.querySelectorAll('.hud').forEach((h) => h.classList.toggle('show', s === 'race'));
   mini.classList.toggle('show', s === 'race');
@@ -1458,28 +1470,238 @@ async function menuFlow() {
   await pickFlow(opt);
 }
 
-async function pickFlow(mode) {
-  setScreen('pick');
-  $('#pick-cards').innerHTML = CHARACTERS.map((c, k) =>
-    '<div class="card"><h3><span class="swatch" style="background:' + c.color + ';border-color:' + c.accent + '"></span>' + c.name +
-    '</h3><p><b>' + c.tagline + '</b> — ' + c.desc + '</p>' +
-    '<div class="key">Velocidade ' + bar(c.stats.speed) + ' · Aceleração ' + bar(c.stats.accel) + ' · Curva ' + bar(c.stats.handling) + '</div>' +
-    '<div class="key">Teclado: <kbd>' + (k + 1) + '</kbd> / <kbd>' + (k === 0 ? 9 : 0) + '</kbd></div></div>').join('');
-  const status = (i, text) => { document.querySelector('.pick-status div[data-i="' + i + '"]').textContent = 'Jogador ' + (i + 1) + ': ' + text; };
-  status(0, 'escolhendo…');
-  status(1, 'escolhendo…');
-  const spec = {
-    title: 'Escolha seu piloto', text: 'Cada piloto tem um jeito de dirigir.', two: true,
-    options: CHARACTERS.map((c) => ({ id: c.id, label: c.name, sub: c.tagline + ' — ' + c.desc, color: c.color, accent: c.accent })),
-  };
-  const picks = await Promise.all([0, 1].map((i) => ask(i, spec).then((id) => {
-    status(i, '✔ ' + characterById(id).name);
+// ------------------------------------------------------------------------
+// Seleção de piloto (estilo Mario Kart): grade de retratos + kart girando
+// ------------------------------------------------------------------------
+const PICK_COLS = 6;
+const PICK_SLOTS = Math.max(12, Math.ceil(CHARACTERS.length / PICK_COLS) * PICK_COLS); // "?" = vagas para novos pilotos
+const pickState = { cursor: [0, 0], ready: [false, false], waiter: null, built: false };
+const pickEls = { tiles: [], cursors: [] };
+const portraits = {}; // id -> dataURL
+
+function buildPickGrid() {
+  if (pickState.built) return;
+  pickState.built = true;
+  const grid = $('#pick-grid');
+  grid.style.gridTemplateColumns = 'repeat(' + PICK_COLS + ', 1fr)';
+  for (let n = 0; n < PICK_SLOTS; n++) {
+    const c = CHARACTERS[n];
+    const tile = document.createElement('div');
+    tile.className = 'tile' + (c ? '' : ' locked');
+    if (c) {
+      tile.style.setProperty('--c', c.color);
+      tile.innerHTML = '<div class="face" style="background:' + c.color + '">' + c.name.slice(0, 1) + '</div>';
+    } else {
+      tile.innerHTML = '<div class="q">?</div>';
+    }
+    grid.appendChild(tile);
+    pickEls.tiles.push(tile);
+  }
+  for (let i = 0; i < 2; i++) {
+    const cur = document.createElement('div');
+    cur.className = 'cursor';
+    cur.dataset.i = i;
+    cur.innerHTML = '<span class="tag">' + (i + 1) + 'P</span><i class="c1"></i><i class="c2"></i><i class="c3"></i><i class="c4"></i>';
+    grid.appendChild(cur);
+    pickEls.cursors.push(cur);
+  }
+  renderPortraits();
+}
+
+// Gera os retratos da grade a partir dos próprios modelos 3D (close no rosto)
+async function renderPortraits() {
+  const list = CHARACTERS.filter((c) => c.model && c.model.url);
+  if (!list.length) return;
+  let r;
+  try {
+    r = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  } catch (e) { return; }
+  r.setSize(256, 256);
+  r.outputColorSpace = THREE.SRGBColorSpace;
+  const sc = new THREE.Scene();
+  sc.add(new THREE.HemisphereLight('#ffffff', '#8aa', 2.2));
+  const key = new THREE.DirectionalLight('#fff', 2.2);
+  key.position.set(1.5, 2.5, 4);
+  sc.add(key);
+  const cam = new THREE.PerspectiveCamera(30, 1, 0.05, 50);
+  for (const c of list) {
+    try {
+      const gltf = await loadModel(c.model.url);
+      const obj = cloneSkinned(gltf.scene);
+      sc.add(obj);
+      obj.updateMatrixWorld(true);
+      // Enquadra o rosto: usa o osso "head" (base da cabeça) se existir, senão o topo do modelo
+      const box = new THREE.Box3().setFromObject(obj);
+      const h = Math.max(0.1, box.max.y - box.min.y);
+      const headBone = obj.getObjectByName('head');
+      const headY = headBone ? headBone.getWorldPosition(new THREE.Vector3()).y : box.max.y - h * 0.35;
+      const ty = headY + h * 0.17; // centro do rosto
+      cam.position.set(h * 0.18, ty + h * 0.03, h * 0.78);
+      cam.lookAt(0, ty, 0);
+      r.render(sc, cam);
+      portraits[c.id] = r.domElement.toDataURL('image/png');
+      sc.remove(obj);
+      const tile = pickEls.tiles[CHARACTERS.indexOf(c)];
+      if (tile) tile.innerHTML = '<img alt="" src="' + portraits[c.id] + '">';
+    } catch (e) { /* fica com a letra */ }
+  }
+  r.dispose();
+}
+
+// Vitrine: um kart girando numa plataforma para cada jogador
+const showroom = new THREE.Scene();
+showroom.add(new THREE.HemisphereLight('#ffffff', '#6b7a99', 2.0));
+{
+  const sl = new THREE.DirectionalLight('#ffffff', 2.4);
+  sl.position.set(4, 8, 6);
+  showroom.add(sl);
+}
+const stages = [0, 1].map((i) => {
+  const g = new THREE.Group();
+  g.position.x = i === 0 ? -40 : 40;
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.8, 0.5, 48), new THREE.MeshStandardMaterial({ color: '#2d3240', roughness: 0.6, metalness: 0.3 }));
+  base.position.y = -0.25;
+  const top = new THREE.Mesh(new THREE.CylinderGeometry(2.45, 2.45, 0.04, 48), new THREE.MeshStandardMaterial({ color: '#3d4456', roughness: 0.5, metalness: 0.2 }));
+  top.position.y = 0.01;
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.62, 0.05, 8, 64), new THREE.MeshBasicMaterial({ color: COLORS[i] }));
+  ring.rotation.x = Math.PI / 2;
+  ring.position.y = -0.02;
+  const spin = new THREE.Group();
+  spin.scale.setScalar(1.6); // kart grande na vitrine, quase do tamanho da plataforma
+  g.add(base, top, ring, spin);
+  showroom.add(g);
+  const cam = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+  return { g, spin, cam, charId: null, kart: null, hop: 0 };
+});
+
+function showOnStage(i, char) {
+  const st = stages[i];
+  if (st.charId === char.id) return;
+  st.charId = char.id;
+  if (st.kart) {
+    st.spin.remove(st.kart.root);
+    st.kart.root.traverse((o) => { if (o.geometry && !o.isSkinnedMesh) o.geometry.dispose(); });
+  }
+  st.kart = buildKart(COLORS[i], char, null, st.spin);
+}
+
+function cursorChar(i) { return CHARACTERS[pickState.cursor[i]] || null; }
+
+function updatePickUI() {
+  for (let i = 0; i < 2; i++) {
+    const idx = pickState.cursor[i];
+    const tile = pickEls.tiles[idx];
+    const cur = pickEls.cursors[i];
+    if (tile && cur) {
+      const both = pickState.cursor[0] === pickState.cursor[1];
+      cur.style.left = tile.offsetLeft + 'px';
+      cur.style.top = tile.offsetTop + 'px';
+      cur.style.width = tile.offsetWidth + 'px';
+      cur.style.height = tile.offsetHeight + 'px';
+      cur.classList.toggle('shared', both && i === 1);
+      cur.classList.toggle('ready', pickState.ready[i]);
+    }
+    const c = cursorChar(i);
+    const box = document.querySelector('.pick-stage[data-i="' + i + '"]');
+    box.querySelector('.pname').textContent = c ? c.name : 'Em breve';
+    box.querySelector('.ptag').textContent = c ? c.tagline : 'Novo piloto chegando';
+    box.querySelector('.pstats').innerHTML = c
+      ? statRow('Velocidade', c.stats.speed) + statRow('Aceleração', c.stats.accel) + statRow('Curva', c.stats.handling)
+      : '';
+    box.classList.toggle('ready', pickState.ready[i]);
+    if (c) showOnStage(i, c);
+    else if (stages[i].kart) { stages[i].spin.remove(stages[i].kart.root); stages[i].kart = null; stages[i].charId = null; }
+  }
+  pickEls.tiles.forEach((t, n) => {
+    t.classList.toggle('picked', pickState.ready.some((r, i) => r && pickState.cursor[i] === n));
+  });
+  const bar = document.querySelector('#pick-name');
+  bar.innerHTML = [0, 1].map((i) => {
+    const c = cursorChar(i);
+    return '<span style="color:' + COLORS[i] + '">' + (i + 1) + 'P</span> ' + (c ? c.name : '?') + (pickState.ready[i] ? ' ✔' : '');
+  }).join('<b>·</b>');
+}
+
+function statRow(label, v) {
+  const pct = Math.round(clamp((v - 0.8) / 0.4, 0.08, 1) * 100);
+  return '<div class="stat"><span>' + label + '</span><div class="meter"><i style="width:' + pct + '%"></i></div></div>';
+}
+
+function sendPickState(i) {
+  const c = cursorChar(i);
+  sendTo(i, {
+    t: 'pick',
+    name: c ? c.name : 'Em breve',
+    sub: c ? c.tagline + ' — ' + c.desc : 'Este piloto ainda vai chegar!',
+    color: c ? c.color : '#64748b',
+    portrait: c && portraits[c.id] ? true : false,
+    ready: pickState.ready[i],
+  });
+}
+
+function pickNav(i, d) {
+  if (state.screen !== 'pick') return;
+  audio();
+  if (d === 'back') {
+    if (pickState.ready[i]) {
+      pickState.ready[i] = false;
+      sfx.item();
+    } else if (!pickState.ready[0] && !pickState.ready[1] && pickState.waiter) {
+      const w = pickState.waiter;
+      pickState.waiter = null;
+      w.resolve('back');
+      return;
+    }
+  } else if (d === 'ok') {
+    if (pickState.ready[i]) return;
+    const c = cursorChar(i);
+    if (!c) { sfx.hit(); buzz(i, 120); return; }
+    pickState.ready[i] = true;
+    stages[i].hop = 1;
     sfx.box();
-    setIdle(i, '✔ ' + characterById(id).name, 'Esperando o outro jogador…');
-    return id;
-  })));
+    buzz(i, 80);
+  } else if (!pickState.ready[i]) {
+    const n = pickState.cursor[i];
+    const col = n % PICK_COLS, row = Math.floor(n / PICK_COLS), rows = PICK_SLOTS / PICK_COLS;
+    let nc = col, nr = row;
+    if (d === 'left') nc = (col + PICK_COLS - 1) % PICK_COLS;
+    if (d === 'right') nc = (col + 1) % PICK_COLS;
+    if (d === 'up') nr = (row + rows - 1) % rows;
+    if (d === 'down') nr = (row + 1) % rows;
+    pickState.cursor[i] = nr * PICK_COLS + nc;
+    sfx.item();
+  }
+  updatePickUI();
+  sendPickState(i);
+  if (pickState.ready[0] && pickState.ready[1] && pickState.waiter) {
+    const w = pickState.waiter;
+    pickState.waiter = null;
+    w.resolve('go');
+  }
+}
+
+async function pickFlow(mode) {
+  buildPickGrid();
+  setScreen('pick');
+  // Começa no último piloto escolhido (ou P1 no primeiro e P2 no segundo)
+  for (let i = 0; i < 2; i++) {
+    const prev = CHARACTERS.findIndex((c) => c.id === state.picks[i]);
+    pickState.cursor[i] = prev >= 0 ? prev : Math.min(i, CHARACTERS.length - 1);
+    pickState.ready[i] = false;
+    slots[i].driving = false;
+    sendPickState(i);
+  }
+  requestAnimationFrame(updatePickUI);
+  const res = await new Promise((resolve, reject) => { pickState.waiter = { resolve, reject }; });
+  if (res === 'back') {
+    await menuFlow();
+    return;
+  }
+  const picks = [0, 1].map((i) => cursorChar(i).id);
   state.picks = picks;
-  await sleep(700);
+  setIdleBoth('Prontos! 🏁', 'A corrida vai começar…');
+  sfx.finish();
+  await sleep(1300);
   await raceFlow(mode, picks);
 }
 
@@ -1601,7 +1823,7 @@ async function resultsFlow(mode, picks) {
 function resize() {
   renderer.setSize(window.innerWidth, window.innerHeight, false);
 }
-window.addEventListener('resize', resize);
+window.addEventListener('resize', () => { resize(); if (state.screen === 'pick') updatePickUI(); });
 resize();
 
 const STEP = 1 / 120;
@@ -1646,6 +1868,32 @@ function frame(now) {
     }
     updateHud(dt);
     drawMinimap();
+  } else if (state.screen === 'pick') {
+    // Fundo transparente (o azul vem do CSS) + um kart girando para cada jogador
+    renderer.setClearColor(0x000000, 0);
+    renderer.setViewport(0, 0, w, h);
+    renderer.setScissor(0, 0, w, h);
+    renderer.clear();
+    for (let i = 0; i < 2; i++) {
+      const st = stages[i];
+      const el = document.querySelector('.pick-stage[data-i="' + i + '"] .view');
+      const r = el.getBoundingClientRect();
+      if (r.width < 4 || r.height < 4) continue;
+      st.spin.rotation.y += dt * (pickState.ready[i] ? 2.2 : 0.7);
+      st.hop = Math.max(0, st.hop - dt * 2.5);
+      st.spin.position.y = Math.sin(st.hop * Math.PI) * 0.8;
+      st.cam.aspect = r.width / r.height;
+      // Distância para a plataforma (raio ~2,8) caber inteira na largura e na altura da área
+      const vHalf = Math.tan(THREE.MathUtils.degToRad(st.cam.fov / 2));
+      const fit = Math.max(2.85 / (vHalf * st.cam.aspect), 1.55 / vHalf);
+      st.cam.position.set(st.g.position.x, fit * 0.27, fit);
+      st.cam.lookAt(st.g.position.x, 1.0, 0);
+      st.cam.updateProjectionMatrix();
+      const y = h - r.bottom;
+      renderer.setViewport(r.left, y, r.width, r.height);
+      renderer.setScissor(r.left, y, r.width, r.height);
+      renderer.render(showroom, st.cam);
+    }
   } else {
     // Câmera aérea girando em volta da pista (lobby, menus e resultado)
     const a = elapsed * 0.06;

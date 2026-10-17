@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1020" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Kart · Controle</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="pad">
+    <!-- Digitar código -->
+    <div class="screen" id="s-join">
+      <div class="menu-wrap">
+        <h1 class="pad-title title">🏎 TURBO KART</h1>
+        <p class="pad-msg">Digite o código que aparece na tela do computador</p>
+        <input class="code-input" id="code" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+        <button class="btn big" id="join-btn">Entrar</button>
+      </div>
+    </div>
+
+    <!-- Mensagens e menus (modo, personagem, jogar de novo) -->
+    <div class="screen" id="s-menu">
+      <div class="menu-wrap">
+        <span class="badge" id="menu-badge" hidden></span>
+        <h1 class="pad-title" id="title">Conectando…</h1>
+        <p class="pad-msg" id="text"></p>
+        <div class="options" id="options"></div>
+      </div>
+    </div>
+
+    <!-- Pilotagem -->
+    <div class="screen" id="s-drive">
+      <div class="drive-top">
+        <span class="badge" id="drive-badge"></span>
+        <span class="grow" id="race-info">—</span>
+        <button id="mode-wheel" class="on">🎡 Volante</button>
+        <button id="mode-gyro">📱 Giroscópio</button>
+        <button id="calibrate" hidden>🎯 Centralizar</button>
+      </div>
+      <div class="portrait-tip">Dica: gire o celular para a horizontal 🔄</div>
+      <div class="drive">
+        <div class="steer-zone" id="steer-zone">
+          <div class="wheel" id="wheel"><div class="spoke"></div><div class="spoke v"></div></div>
+          <div class="steer-hint" id="steer-hint">Arraste o volante para os lados</div>
+        </div>
+        <div class="pedals">
+          <button class="pedal item" id="btn-item"><span class="ico" id="item-ico">🎁</span>ITEM</button>
+          <button class="pedal brake" id="btn-brake"><span class="ico">🛑</span>FREAR / RÉ</button>
+          <button class="pedal gas" id="btn-gas"><span class="ico">⚡</span>ACELERAR</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="../game/vendor/peerjs.min.js"></script>
+    <script src="controller.js"></script>
+  </body>
+</html>

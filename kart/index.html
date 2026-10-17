@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Turbo Kart</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      { "imports": { "three": "./vendor/three.module.min.js" } }
+    </script>
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+
+    <!-- HUD de cada jogador (tela dividida: P1 em cima, P2 embaixo) -->
+    <div class="hud" data-i="0">
+      <div class="pos"></div><div class="lap"></div><div class="item"></div>
+      <div class="speed"></div><div class="name"></div><div class="msg"></div>
+    </div>
+    <div class="hud" data-i="1">
+      <div class="pos"></div><div class="lap"></div><div class="item"></div>
+      <div class="speed"></div><div class="name"></div><div class="msg"></div>
+    </div>
+    <canvas id="minimap" width="220" height="220"></canvas>
+    <div id="countdown"></div>
+
+    <!-- Lobby -->
+    <div class="overlay show" id="ov-lobby">
+      <div class="panel">
+        <h1 class="title">🏎 TURBO KART</h1>
+        <p class="subtitle">Corrida de kart 3D para 2 jogadores · o celular é o volante</p>
+        <div class="lobby-grid">
+          <div id="qr">Gerando QR code…</div>
+          <div>
+            <div>Aponte a câmera do celular para o QR code ou abra o link e digite o código:</div>
+            <div class="code" id="room-code">····</div>
+            <div class="url" id="room-url"></div>
+            <div class="net-status" id="net-status">Conectando ao servidor de pareamento…</div>
+            <div class="slots">
+              <div class="slot" data-i="0"><b>Jogador 1</b><span>aguardando…</span></div>
+              <div class="slot" data-i="1"><b>Jogador 2</b><span>aguardando…</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="hint">
+          Sem celular? <kbd>Espaço</kbd> = teclado A (<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> + <kbd>E</kbd> item, menus com <kbd>1</kbd> <kbd>2</kbd>) ·
+          <kbd>Enter</kbd> = teclado B (setas + <kbd>Shift dir.</kbd> item, menus com <kbd>9</kbd> <kbd>0</kbd>)
+        </div>
+      </div>
+    </div>
+
+    <!-- Escolha de modo -->
+    <div class="overlay" id="ov-menu">
+      <div class="panel">
+        <h1 class="title">ESCOLHA O MODO</h1>
+        <p class="subtitle">Qualquer jogador pode escolher pelo celular · 3 voltas</p>
+        <div class="cards">
+          <div class="card versus">
+            <h3>🏆 Competição</h3>
+            <p>Os dois contra todos: corrida com 4 karts da CPU. Quem terminar na frente do outro vence. Itens acertam todo mundo!</p>
+            <div class="key">Teclado: <kbd>1</kbd> / <kbd>9</kbd></div>
+          </div>
+          <div class="card coop">
+            <h3>🤝 Cooperativo</h3>
+            <p>Corrida em equipe contra 2 karts da CPU mais rápidos. As posições viram pontos e a equipe com mais pontos vence. Sem fogo amigo.</p>
+            <div class="key">Teclado: <kbd>2</kbd> / <kbd>0</kbd></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Escolha de personagem -->
+    <div class="overlay" id="ov-pick">
+      <div class="panel">
+        <h1 class="title">ESCOLHA O PILOTO</h1>
+        <p class="subtitle">Cada jogador escolhe no próprio celular</p>
+        <div class="cards" id="pick-cards"></div>
+        <div class="pick-status">
+          <div data-i="0">Jogador 1: escolhendo…</div>
+          <div data-i="1">Jogador 2: escolhendo…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultado -->
+    <div class="overlay" id="ov-results">
+      <div class="panel">
+        <h1 class="title" id="res-title">RESULTADO</h1>
+        <p class="subtitle" id="res-sub"></p>
+        <table class="results" id="res-table"></table>
+        <div class="hint">Jogar de novo ou trocar de modo pelo celular</div>
+      </div>
+    </div>
+
+    <script src="../game/vendor/peerjs.min.js"></script>
+    <script src="../game/vendor/qrcode.js"></script>
+    <script type="module" src="host.js"></script>
+  </body>
+</html>

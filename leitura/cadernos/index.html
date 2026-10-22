@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="../shared/base.css" />
     <style>
       :root { --mao: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive; --papel: #fbf6e9; --pauta: #e3dccb; --tinta: #2b3a67; }
-      @media (prefers-color-scheme: dark) { :root { --papel: #23201a; --pauta: #353026; --tinta: #a9bdf2; } }
+      @media (prefers-color-scheme: dark) { :root:not([data-theme='light']) { --papel: #23201a; --pauta: #353026; --tinta: #a9bdf2; } }
+      :root[data-theme='dark'] { --papel: #23201a; --pauta: #353026; --tinta: #a9bdf2; }
       .estudioso { font-size: 15px; }
       .pagina {
         display: block;

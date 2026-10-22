@@ -16,10 +16,10 @@
   --radius: 14px;
   --serif: 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
   --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color-scheme: light dark;
+  color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #15130f;
     --surface: #1e1b16;
     --surface-2: #29251e;
@@ -33,7 +33,24 @@
     --hint: #4a3d1f;
     --sel: #5a4718;
     --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
   }
+}
+:root[data-theme='dark'] {
+  --bg: #15130f;
+  --surface: #1e1b16;
+  --surface-2: #29251e;
+  --text: #ece5d8;
+  --muted: #a59b89;
+  --line: #3a342a;
+  --accent: #e0a44f;
+  --accent-ink: #1a1408;
+  --ok: #6cc28f;
+  --warn: #f08a5d;
+  --hint: #4a3d1f;
+  --sel: #5a4718;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }

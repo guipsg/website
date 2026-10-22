@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Constelações · Laboratório de leitura</title>
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <link rel="stylesheet" href="../shared/base.css" />
+    <style>
+      .painel {
+        background: #0f1420;
+        border: 1px solid #263048;
+        border-radius: var(--radius);
+        overflow: hidden;
+        position: relative;
+      }
+      .painel svg { display: block; width: 100%; height: min(68vh, 560px); touch-action: manipulation; }
+      .painel .grade line { stroke: #1b2438; stroke-width: 1; }
+      .no { cursor: pointer; }
+      .no circle { fill: #1a2234; stroke: #5d6b8c; stroke-width: 3; transition: r 0.2s; }
+      .no.aberto circle { stroke: #f0a040; }
+      .no.resolvido circle { fill: #20324a; stroke: #7fb4e8; }
+      .no.sintese circle { stroke-width: 5; }
+      .no .icone { fill: #f0a040; font: 700 34px var(--sans); text-anchor: middle; dominant-baseline: central; }
+      .no.resolvido .icone { fill: #cfe3f7; font-size: 26px; }
+      .no .rotulo { fill: #dfe6f3; font: 600 20px var(--sans); text-anchor: middle; }
+      .no.aberto .rotulo { fill: #f6c787; }
+      .no.novo circle { animation: pulso 1.4s ease-in-out 3; }
+      @keyframes pulso { 50% { stroke-width: 9; } }
+      .aresta { stroke-width: 3; fill: none; }
+      .aresta.pendente { stroke-dasharray: 10 8; }
+      .e-tema { stroke: #8b9ab8; }
+      .e-citacao { stroke: #f0a040; }
+      .e-alusao { stroke: #b48ce0; }
+      .e-mesma_palavra { stroke: #6cc2a8; }
+      .legenda { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); margin: 8px 2px; }
+      .legenda i { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 6px; }
+      .contagem { position: absolute; top: 8px; left: 12px; font-size: 13px; color: #8b9ab8; }
+      .pistas-lista { padding-left: 18px; }
+      .pistas-lista li { margin: 6px 0; }
+    </style>
+  </head>
+  <body>
+    <main id="app"></main>
+    <script src="../shared/base.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

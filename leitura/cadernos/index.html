@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Cadernos · Laboratório de leitura</title>
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../shared/base.css" />
+    <style>
+      :root { --mao: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive; --papel: #fbf6e9; --pauta: #e3dccb; --tinta: #2b3a67; }
+      @media (prefers-color-scheme: dark) { :root { --papel: #23201a; --pauta: #353026; --tinta: #a9bdf2; } }
+      .estudioso { font-size: 15px; }
+      .pagina {
+        display: block;
+        width: 100%;
+        text-align: left;
+        font: inherit;
+        color: var(--text);
+        cursor: pointer;
+        position: relative;
+        background: var(--papel) repeating-linear-gradient(to bottom, transparent 0 31px, var(--pauta) 31px 32px);
+        border: 1px solid var(--line);
+        border-left: 4px solid #c97a6a;
+        border-radius: 6px 12px 12px 6px;
+        padding: 12px 16px 14px 18px;
+        margin: 14px 0;
+        box-shadow: 0 2px 0 var(--line);
+      }
+      .pagina.feita { border-left-color: var(--ok); }
+      .manuscrito { font-family: var(--mao); font-size: 25px; line-height: 32px; color: var(--tinta); margin: 4px 0; }
+      .riscado { text-decoration: line-through; text-decoration-color: #c0392b; text-decoration-thickness: 2px; opacity: 0.7; }
+      .depois { margin-top: 10px; padding-top: 6px; border-top: 1px dashed var(--pauta); }
+      .depois .rot { font-size: 12px; color: var(--muted); }
+      .topo-pag { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .ultima { border-left-color: var(--accent); }
+      .comparacao { display: grid; gap: 12px; }
+      @media (min-width: 640px) { .comparacao { grid-template-columns: 1fr 1fr; } }
+      .comparacao > div { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
+    </style>
+  </head>
+  <body>
+    <main id="app"></main>
+    <script src="../shared/base.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -18,6 +18,46 @@ O foco não é o conteúdo, e sim a forma de absorção. Os pacotes em
 > Os pacotes contêm as respostas. Se quiser jogar sem saber, não abra os
 > JSON. Deixe o protótipo mostrar.
 
+## Como usar
+
+Abra `leitura/` no navegador do celular. No site publicado, o endereço é
+`<seu-site>/leitura/`. A página não aparece no hub de propósito, porque é
+de uso pessoal.
+
+Os arquivos são estáticos e não precisam de build. Para rodar no
+computador, sirva a pasta raiz do site (`python3 -m http.server`) e abra
+`http://localhost:8000/leitura/`. Abrir o arquivo direto (`file://`) não
+funciona, porque o navegador bloqueia a leitura dos JSON.
+
+```
+leitura/
+  index.html          início: protótipos, tradução, diário (copiar/baixar)
+  shared/base.js      API da Bíblia, leitor de passagens, janelas, progresso, diário
+  shared/base.css     estilos comuns, mobile primeiro, tema claro/escuro
+  constelacoes/       protótipo 1
+  cadernos/           protótipo 2
+  deducao/            protótipo 3
+  lexico/             protótipo 4
+  promessa/           protótipo 5
+  conteudo/           pacotes JSON
+```
+
+O progresso de cada protótipo e o diário ficam no `localStorage` do
+aparelho. Use "Recomeçar" na página inicial para zerar um protótipo, e
+"Baixar diário" para guardar as respostas fora do navegador.
+
+### Tradução (API da AO Lab)
+
+O texto vem da [Free Use Bible API](https://bible.helloao.org/), da AO
+Lab: `GET /api/available_translations.json` e
+`GET /api/{tradução}/{livro}/{capítulo}.json`. A base procura uma tradução
+em português chamada NVI (ou "Nova Versão Internacional"). **Se a API não
+tiver a NVI, o que é provável, porque a API só publica textos de uso livre
+e a NVI pertence à Biblica**, o laboratório pede para você escolher outra
+tradução em português. A escolha pode ser trocada a qualquer momento no
+topo de cada protótipo ou na página inicial. Os capítulos já baixados
+ficam em cache no aparelho.
+
 ## Base comum
 
 Os cinco protótipos devem compartilhar:
@@ -32,11 +72,9 @@ a mecânica, não a interface de leitura.
 
 ### Texto bíblico
 
-Os pacotes **não contêm texto bíblico**, só referências. O site é
-público, e as traduções mais usadas em português têm direitos autorais.
-O leitor resolve cada referência OSIS contra uma fonte de texto escolhida
-por você: um arquivo local fora do repositório, ou uma tradução de
-domínio público se os protótipos forem publicados.
+Os pacotes **não contêm texto bíblico**, só referências. O leitor busca
+cada referência OSIS na API da AO Lab, na tradução escolhida (ver "Como
+usar").
 
 Atenção: os códigos OSIS seguem a numeração de versículos usual das
 Bíblias em português e inglês. Ela difere da numeração hebraica em alguns
@@ -185,6 +223,10 @@ escreve a própria definição e a compara com a `sintese`.
 ```
 
 ## Diário pós-sessão (igual nos cinco)
+
+Os protótipos fazem essas perguntas sozinhos: as três primeiras no botão
+"Encerrar", a quarta quando você abre num dia novo e a quinta 3 dias
+depois da primeira sessão, antes de mostrar o conteúdo.
 
 Responda em menos de 1 minuto, logo depois de cada sessão:
 

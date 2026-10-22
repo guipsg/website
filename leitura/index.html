@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Laboratório de leitura</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+    <link rel="stylesheet" href="shared/base.css" />
+    <style>
+      .proto { display: flex; gap: 14px; align-items: flex-start; text-decoration: none; color: var(--text); }
+      .proto .num { font: 700 28px var(--serif); color: var(--accent); min-width: 28px; }
+      .proto p { margin: 2px 0; }
+      .proto .meta { font-size: 13px; color: var(--muted); }
+      .entrada { border-top: 1px solid var(--line); padding: 10px 0; font-size: 14px; }
+      .entrada b { font-size: 15px; }
+      .entrada p { margin: 2px 0; }
+      footer.nota { font-size: 13px; color: var(--muted); margin-top: 28px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Laboratório de leitura</h1>
+      <p class="muted">Cinco protótipos para testar <b>como</b> um texto bíblico é absorvido. Cada um tem um tema diferente. Use o diário depois de cada sessão.</p>
+
+      <div class="card linha" style="justify-content: space-between">
+        <div>
+          <div class="muted" style="font-size: 13px">Tradução</div>
+          <b id="trad">verificando…</b>
+        </div>
+        <button class="btn" id="trocar">Trocar</button>
+      </div>
+
+      <div id="protos"></div>
+
+      <h2>Diário</h2>
+      <div class="linha">
+        <button class="btn" id="exportar">Copiar diário (JSON)</button>
+        <button class="btn" id="baixar">Baixar diário</button>
+      </div>
+      <div id="diario"></div>
+
+      <footer class="nota">
+        Texto bíblico pela <a href="https://bible.helloao.org/" target="_blank" rel="noopener">Free Use Bible API</a> (AO Lab).
+        O progresso e o diário ficam salvos só neste aparelho.
+      </footer>
+    </main>
+    <script src="shared/base.js"></script>
+    <script>
+      (() => {
+        'use strict';
+        const { h, modal, toast } = Lab;
+        const PROTOS = [
+          { id: 'constelacoes', nome: 'Constelações', tema: 'Descanso', desc: 'Um grafo de perguntas: cada "?" abre quando uma pista aponta para ele.' },
+          { id: 'cadernos', nome: 'Cadernos', tema: 'O Cordeiro', desc: 'As anotações de um professor: confirme, corrija ou complete o que ele escreveu.' },
+          { id: 'deducao', nome: 'Mesa de dedução', tema: 'Melquisedeque', desc: 'Complete frases de síntese. Só blocos de três se confirmam.' },
+          { id: 'lexico', nome: 'Léxico vivo', tema: 'Hesed, kavod, shalom', desc: 'Descubra o sentido de palavras hebraicas pelos contextos.' },
+          { id: 'promessa', nome: 'Linha da promessa', tema: 'O descendente prometido', desc: 'Atravesse a linha do tempo prevendo cada passo.' },
+        ];
+
+        function renderProtos() {
+          const d = Lab.diario();
+          document.getElementById('protos').replaceChildren(
+            ...PROTOS.map((p, i) => {
+              const sess = d.filter((e) => e.proto === p.id && e.tipo === 'sessao').length;
+              const temProg = Lab.store.get(`${p.id}:progresso`, null);
+              return h(
+                'div',
+                { class: 'card' },
+                h(
+                  'a',
+                  { class: 'proto', href: `${p.id}/` },
+                  h('span', { class: 'num' }, i + 1),
+                  h('div', {}, h('b', {}, p.nome), h('p', {}, p.desc), h('p', { class: 'meta' }, `Tema: ${p.tema} · ${sess} ${sess === 1 ? 'sessão' : 'sessões'}`)),
+                ),
+                temProg && h('div', { class: 'linha', style: 'justify-content:flex-end' }, h('button', { class: 'btn link', onclick: () => recomecar(p) }, 'Recomeçar')),
+              );
+            }),
+          );
+        }
+
+        async function recomecar(p) {
+          const r = await modal({
+            title: `Recomeçar ${p.nome}?`,
+            body: h('p', {}, 'Apaga o progresso deste protótipo. O diário é mantido.'),
+            actions: [
+              { label: 'Cancelar', value: null },
+              { label: 'Apagar progresso', value: true, primary: true },
+            ],
+          });
+          if (!r) return;
+          Lab.store.del(`${p.id}:progresso`);
+          toast('Progresso apagado.');
+          renderProtos();
+        }
+
+        function renderDiario() {
+          const d = Lab.diario().slice().reverse();
+          const nome = (id) => PROTOS.find((p) => p.id === id)?.nome || id;
+          const el = document.getElementById('diario');
+          if (!d.length) return el.replaceChildren(h('p', { class: 'muted' }, 'Nenhuma sessão ainda.'));
+          el.replaceChildren(
+            ...d.map((e) => {
+              const quando = new Date(e.quando || e.inicio).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+              if (e.tipo === 'sessao')
+                return h(
+                  'div',
+                  { class: 'entrada' },
+                  h('b', {}, `${nome(e.proto)} · sessão`), ' ', h('span', { class: 'muted' }, quando),
+                  e.perguntas && h('p', {}, `Perguntas: ${e.perguntas}`),
+                  e.tempo && h('p', {}, `Tempo: ${e.tempo}`),
+                  e.travou && h('p', {}, `Travou: ${e.travou}`),
+                  !e.fim && h('p', { class: 'muted' }, 'sem registro de encerramento'),
+                );
+              if (e.tipo === 'retorno')
+                return h('div', { class: 'entrada' }, h('b', {}, `${nome(e.proto)} · voltou`), ' ', h('span', { class: 'muted' }, quando), h('p', {}, e.resposta === 'vontade' ? 'Por vontade própria' : 'Por lembrete ou obrigação'));
+              return h('div', { class: 'entrada' }, h('b', {}, `${nome(e.proto)} · lembrança tardia`), ' ', h('span', { class: 'muted' }, quando), h('p', {}, e.texto));
+            }),
+          );
+        }
+
+        async function renderTrad() {
+          const el = document.getElementById('trad');
+          try {
+            const t = await Lab.bible.ensure();
+            el.textContent = t ? `${t.shortName || ''} ${t.name}`.trim() : 'nenhuma';
+          } catch {
+            el.textContent = 'sem conexão com a API';
+          }
+        }
+
+        document.getElementById('trocar').onclick = async () => {
+          try {
+            await Lab.chooseTranslation();
+          } catch {}
+          renderTrad();
+        };
+        const json = () => JSON.stringify(Lab.diario(), null, 2);
+        document.getElementById('exportar').onclick = async () => {
+          try {
+            await navigator.clipboard.writeText(json());
+            toast('Diário copiado.', 'ok');
+          } catch {
+            toast('Não consegui copiar. Use "Baixar diário".', 'erro');
+          }
+        };
+        document.getElementById('baixar').onclick = () => {
+          const a = h('a', { href: URL.createObjectURL(new Blob([json()], { type: 'application/json' })), download: `diario-leitura-${new Date().toISOString().slice(0, 10)}.json` });
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        };
+
+        renderProtos();
+        renderDiario();
+        renderTrad();
+      })();
+    </script>
+  </body>
+</html>

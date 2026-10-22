@@ -1,0 +1,94 @@
+{
+  "prototipo": "deducao",
+  "versao": 1,
+  "tema": "Melquisedeque",
+  "pergunta_central": "Por que um rei que aparece em três versículos de Gênesis ganha um capítulo inteiro em Hebreus?",
+  "convite": {
+    "pergunta": "Há três fios soltos sobre a mesa. Qual você quer puxar primeiro?",
+    "opcoes": [
+      { "texto": "Quem era esse homem?", "leva_a": "c1" },
+      { "texto": "Por que um salmo de Davi fala dele?", "leva_a": "c2" },
+      { "texto": "Por que Hebreus se importa tanto com ele?", "leva_a": "c4" }
+    ]
+  },
+  "passagens": {
+    "gn14": { "ref": "Gn 14:17-20", "osis": "Gen.14.17-Gen.14.20" },
+    "sl110": { "ref": "Sl 110:1-4", "osis": "Ps.110.1-Ps.110.4" },
+    "hb5": { "ref": "Hb 5:5-10", "osis": "Heb.5.5-Heb.5.10" },
+    "hb7a": { "ref": "Hb 7:1-3", "osis": "Heb.7.1-Heb.7.3" },
+    "hb7b": { "ref": "Hb 7:4-10", "osis": "Heb.7.4-Heb.7.10" },
+    "hb7c": { "ref": "Hb 7:11-14", "osis": "Heb.7.11-Heb.7.14" },
+    "hb7d": { "ref": "Hb 7:15-17", "osis": "Heb.7.15-Heb.7.17" },
+    "hb7e": { "ref": "Hb 7:23-25", "osis": "Heb.7.23-Heb.7.25" },
+    "nm18": { "ref": "Nm 18:21-24", "osis": "Num.18.21-Num.18.24" }
+  },
+  "cartas": [
+    { "id": "c1", "passagem": "gn14" },
+    { "id": "c2", "passagem": "sl110" },
+    { "id": "c3", "passagem": "hb5" },
+    { "id": "c4", "passagem": "hb7a" },
+    { "id": "c5", "passagem": "hb7b" },
+    { "id": "c6", "passagem": "hb7c" },
+    { "id": "c7", "passagem": "hb7d" },
+    { "id": "c8", "passagem": "hb7e" },
+    { "id": "c9", "passagem": "nm18" }
+  ],
+  "banco_termos": [
+    "rei", "sacerdote", "profeta", "juiz",
+    "o dízimo", "pão e vinho", "um sacrifício",
+    "maior", "menor", "igual",
+    "dízimos", "terras", "ainda nos lombos", "já nascidos",
+    "para sempre", "por um tempo",
+    "Melquisedeque", "Arão", "Levi", "Judá", "Benjamim",
+    "descendência", "obediência",
+    "indestrutível", "longa", "vive sempre", "voltará um dia"
+  ],
+  "frases": [
+    {
+      "id": "f1",
+      "modelo": "Melquisedeque era ao mesmo tempo {a} de Salém e {b} do Deus Altíssimo.",
+      "lacunas": { "a": "rei", "b": "sacerdote" },
+      "cartas_base": ["c1", "c4"]
+    },
+    {
+      "id": "f2",
+      "modelo": "Abraão entregou a Melquisedeque {a}, e Hebreus conclui disso que Melquisedeque era {b} que Abraão.",
+      "lacunas": { "a": "o dízimo", "b": "maior" },
+      "cartas_base": ["c1", "c5"]
+    },
+    {
+      "id": "f3",
+      "modelo": "Os levitas recebiam {a} do povo, mas, de certo modo, pagaram dízimo a Melquisedeque quando estavam {b} de Abraão.",
+      "lacunas": { "a": "dízimos", "b": "ainda nos lombos" },
+      "cartas_base": ["c5", "c9"]
+    },
+    {
+      "id": "f4",
+      "modelo": "O Salmo 110 anuncia um sacerdote {a}, segundo a ordem de {b}.",
+      "lacunas": { "a": "para sempre", "b": "Melquisedeque" },
+      "cartas_base": ["c2", "c3"]
+    },
+    {
+      "id": "f5",
+      "modelo": "Se a perfeição viesse pelo sacerdócio de {a}, não seria preciso outro sacerdote. E Jesus vinha da tribo de {b}, da qual a lei nada diz sobre sacerdotes.",
+      "lacunas": { "a": "Levi", "b": "Judá" },
+      "cartas_base": ["c6"]
+    },
+    {
+      "id": "f6",
+      "modelo": "Ele é sacerdote não por regra de {a}, mas pelo poder de uma vida {b}. Por isso, como {c}, pode interceder por quem se aproxima de Deus.",
+      "lacunas": { "a": "descendência", "b": "indestrutível", "c": "vive sempre" },
+      "cartas_base": ["c7", "c8"]
+    }
+  ],
+  "blocos": [
+    {
+      "frases": ["f1", "f2", "f3"],
+      "revelacao": "Melquisedeque une duas funções que, em Israel, ficariam separadas: rei e sacerdote. E, pelo argumento do dízimo, ele está acima de Abraão e até de Levi, o pai dos sacerdotes."
+    },
+    {
+      "frases": ["f4", "f5", "f6"],
+      "revelacao": "Davi, séculos depois de Gênesis, anuncia um sacerdote eterno fora da linhagem de Arão. Hebreus vê ali a resposta a um problema: Jesus é da tribo de Judá, a tribo real, e não poderia ser sacerdote pela lei. Seu sacerdócio é de outra ordem, baseado numa vida que não termina. Por isso Melquisedeque ganha um capítulo inteiro: ele é o precedente bíblico de um rei-sacerdote."
+    }
+  ]
+}

@@ -1,0 +1,137 @@
+{
+  "prototipo": "lexico",
+  "versao": 1,
+  "tema": "Três palavras hebraicas: hesed, kavod, shalom",
+  "pergunta_central": "O que uma palavra perde quando é traduzida, e como recuperar isso lendo os contextos?",
+  "convite": {
+    "pergunta": "Três palavras estão sobre a mesa, cada uma escondida por trás de várias traduções. Qual você quer decifrar primeiro?",
+    "opcoes": [
+      { "texto": "A que vira \"misericórdia\", \"bondade\" e \"amor leal\"", "leva_a": "hesed" },
+      { "texto": "A que vira \"glória\", mas também \"pesado\"", "leva_a": "kavod" },
+      { "texto": "A que vira \"paz\", mas aparece numa pergunta sobre irmãos", "leva_a": "shalom" }
+    ]
+  },
+  "passagens": {
+    "gn24": { "ref": "Gn 24:26-27", "osis": "Gen.24.26-Gen.24.27", "contexto": "Gen.24.10-Gen.24.27" },
+    "rt1": { "ref": "Rt 1:8-9", "osis": "Ruth.1.8-Ruth.1.9" },
+    "rt3": { "ref": "Rt 3:9-11", "osis": "Ruth.3.9-Ruth.3.11" },
+    "ex34": { "ref": "Êx 34:5-7", "osis": "Exod.34.5-Exod.34.7" },
+    "os6": { "ref": "Os 6:4-6", "osis": "Hos.6.4-Hos.6.6" },
+    "mq6": { "ref": "Mq 6:6-8", "osis": "Mic.6.6-Mic.6.8" },
+    "sl136": { "ref": "Sl 136:1-9", "osis": "Ps.136.1-Ps.136.9" },
+    "lm3": { "ref": "Lm 3:19-24", "osis": "Lam.3.19-Lam.3.24" },
+
+    "is6": { "ref": "Is 6:1-3", "osis": "Isa.6.1-Isa.6.3" },
+    "sm4a": { "ref": "1Sm 4:16-18", "osis": "1Sam.4.16-1Sam.4.18" },
+    "gn31": { "ref": "Gn 31:1-2", "osis": "Gen.31.1-Gen.31.2" },
+    "ex20": { "ref": "Êx 20:12", "osis": "Exod.20.12" },
+    "pv3": { "ref": "Pv 3:9-10", "osis": "Prov.3.9-Prov.3.10" },
+    "sm4b": { "ref": "1Sm 4:19-22", "osis": "1Sam.4.19-1Sam.4.22" },
+    "ex33": { "ref": "Êx 33:18-23", "osis": "Exod.33.18-Exod.33.23" },
+    "sl19": { "ref": "Sl 19:1-4", "osis": "Ps.19.1-Ps.19.4" },
+
+    "gn37": { "ref": "Gn 37:12-14", "osis": "Gen.37.12-Gen.37.14" },
+    "gn43": { "ref": "Gn 43:26-28", "osis": "Gen.43.26-Gen.43.28" },
+    "jz6": { "ref": "Jz 6:22-24", "osis": "Judg.6.22-Judg.6.24" },
+    "nm6": { "ref": "Nm 6:24-26", "osis": "Num.6.24-Num.6.26" },
+    "jr29": { "ref": "Jr 29:4-7", "osis": "Jer.29.4-Jer.29.7" },
+    "sl122": { "ref": "Sl 122:6-9", "osis": "Ps.122.6-Ps.122.9" },
+    "is9": { "ref": "Is 9:6-7", "osis": "Isa.9.6-Isa.9.7" },
+    "is53": { "ref": "Is 53:4-5", "osis": "Isa.53.4-Isa.53.5" }
+  },
+  "palavras": [
+    {
+      "id": "hesed",
+      "original": "חֶסֶד",
+      "transliteracao": "hesed",
+      "lingua": "hebraico",
+      "traducoes_comuns": ["misericórdia", "bondade", "benignidade", "benevolência", "amor leal", "fidelidade"],
+      "pergunta_inicial": "A mesma palavra hebraica é traduzida como \"misericórdia\", \"bondade\", \"benignidade\" e \"amor leal\". Uma palavra só pode querer dizer tudo isso? Ou essas traduções são pedaços de uma ideia maior?",
+      "facetas": [
+        { "id": "lealdade", "descricao": "Lealdade dentro de uma relação ou compromisso já existente" },
+        { "id": "alem", "descricao": "Bondade ativa, que faz mais do que a obrigação exigiria" },
+        { "id": "carater", "descricao": "Parte do caráter que o próprio Deus declara sobre si" },
+        { "id": "rito", "descricao": "Algo que Deus valoriza mais do que o ritual" },
+        { "id": "permanente", "descricao": "Algo que não se esgota e dura para sempre" }
+      ],
+      "facetas_distratoras": [
+        { "id": "pena", "descricao": "Pena de alguém mais fraco, sem nenhuma relação prévia" },
+        { "id": "divida", "descricao": "Perdão de uma dívida em dinheiro" }
+      ],
+      "ocorrencias": [
+        { "passagem": "gn24", "faceta": "lealdade", "nota": "O servo agradece porque Deus \"não retirou a sua benevolência e a sua verdade\" de Abraão. Hesed aparece em par com fidelidade: Deus cumpre o compromisso com Abraão." },
+        { "passagem": "rt1", "faceta": "lealdade", "nota": "Noemi deseja às noras a mesma hesed que elas tiveram com os mortos e com ela. É lealdade familiar que continuou mesmo depois da morte dos maridos." },
+        { "passagem": "rt3", "faceta": "alem", "nota": "Boaz diz que essa última hesed de Rute é maior que a primeira. Ela poderia ter procurado um homem jovem e escolheu proteger o nome da família. Hesed vai além do que seria cobrado." },
+        { "passagem": "ex34", "faceta": "carater", "nota": "Quando Deus proclama o próprio nome a Moisés, hesed está no centro: \"grande em hesed e fidelidade\", guardando hesed a milhares." },
+        { "passagem": "os6", "faceta": "rito", "nota": "\"Hesed quero, e não sacrifício.\" A hesed do povo é como orvalho que some, e Deus prefere essa lealdade ao ritual." },
+        { "passagem": "mq6", "faceta": "rito", "nota": "Depois de perguntar se Deus quer holocaustos, rios de azeite ou até um filho, o profeta responde: praticar a justiça, amar a hesed e andar humildemente com Deus." },
+        { "passagem": "sl136", "faceta": "permanente", "nota": "O refrão se repete em todos os versículos: \"porque a sua hesed dura para sempre\"." },
+        { "passagem": "lm3", "faceta": "permanente", "nota": "Escrito no meio das ruínas de Jerusalém: as hesed do Senhor não acabam e se renovam a cada manhã." }
+      ],
+      "confirmar_apos": 4,
+      "sintese": "Hesed é amor leal e ativo dentro de um compromisso: fidelidade que age e vai além do que é exigido. É central no nome que Deus declara para si, vale mais do que o ritual e nunca se esgota. Nenhuma tradução isolada carrega tudo isso."
+    },
+    {
+      "id": "kavod",
+      "original": "כָּבוֹד",
+      "transliteracao": "kavod",
+      "lingua": "hebraico",
+      "traducoes_comuns": ["glória", "honra", "riqueza", "esplendor"],
+      "pergunta_inicial": "Em hebraico, \"glória\", \"honra\", \"riqueza\" e \"pesado\" vêm da mesma raiz (k-b-d). O que glória tem a ver com peso?",
+      "facetas": [
+        { "id": "peso", "descricao": "Peso no sentido físico: algo ou alguém pesado" },
+        { "id": "riqueza", "descricao": "Riqueza, aquilo que dá peso social a alguém" },
+        { "id": "honra", "descricao": "Honrar: dar a alguém o peso que ele merece" },
+        { "id": "presenca", "descricao": "A presença real e esmagadora de Deus" },
+        { "id": "universal", "descricao": "Algo que enche e é anunciado por toda a criação" }
+      ],
+      "facetas_distratoras": [
+        { "id": "luz", "descricao": "Apenas brilho ou luz física, sem relação com importância" },
+        { "id": "fama", "descricao": "Fama passageira, boa reputação entre vizinhos" }
+      ],
+      "ocorrencias": [
+        { "passagem": "is6", "faceta": "universal", "nota": "\"Toda a terra está cheia da sua glória (kavod).\" Este é o sentido conhecido. Agora veja os próximos." },
+        { "passagem": "sm4a", "faceta": "peso", "nota": "Eli cai e morre porque era velho e pesado (kaved, a mesma raiz). Aqui é peso físico, literal." },
+        { "passagem": "gn31", "faceta": "riqueza", "nota": "Os filhos de Labão dizem que Jacó juntou \"toda esta glória\" com o que era do pai deles. As traduções costumam escrever \"riqueza\". É o que dá peso a alguém na sociedade." },
+        { "passagem": "ex20", "faceta": "honra", "nota": "\"Honra (kabbed) teu pai e tua mãe\": a mesma raiz, como verbo. Honrar é dar peso." },
+        { "passagem": "pv3", "faceta": "honra", "nota": "\"Honra ao Senhor com os teus bens.\" Dar peso a Deus com aquilo que pesa na sua vida." },
+        { "passagem": "sm4b", "faceta": "presenca", "nota": "A arca é tomada e um menino recebe o nome de Icabode, \"onde está a glória?\": \"foi-se a glória de Israel\". Kavod é a presença de Deus no meio do povo." },
+        { "passagem": "ex33", "faceta": "presenca", "nota": "Moisés pede \"mostra-me a tua glória\", e Deus responde que ninguém pode ver a sua face e viver. Kavod é presença real, pesada demais para um ser humano." },
+        { "passagem": "sl19", "faceta": "universal", "nota": "\"Os céus proclamam a glória de Deus.\" A criação inteira fala do peso de quem a fez." }
+      ],
+      "confirmar_apos": 4,
+      "sintese": "Kavod é \"peso\": aquilo que faz alguém ser importante e levado a sério. Em pessoas, aparece como riqueza e honra. Honrar é dar a alguém o peso que ele tem. Em Deus, kavod é a sua presença real e esmagadora, que enche a terra e que nenhum ser humano suporta ver diretamente."
+    },
+    {
+      "id": "shalom",
+      "original": "שָׁלוֹם",
+      "transliteracao": "shalom",
+      "lingua": "hebraico",
+      "traducoes_comuns": ["paz", "bem-estar", "estar bem", "prosperidade", "saúde"],
+      "pergunta_inicial": "Na Bíblia, \"paz\" (shalom) aparece quando alguém pergunta se os irmãos estão bem. Paz é só a ausência de guerra?",
+      "facetas": [
+        { "id": "bemestar", "descricao": "Bem-estar do dia a dia: estar bem, estar inteiro" },
+        { "id": "dom", "descricao": "Um dom concedido por Deus" },
+        { "id": "comunidade", "descricao": "O bem de uma cidade ou comunidade, não só de um indivíduo" },
+        { "id": "reino", "descricao": "Marca de um reinado justo prometido para o futuro" },
+        { "id": "restauracao", "descricao": "Restauração do que estava quebrado, alcançada a um custo" }
+      ],
+      "facetas_distratoras": [
+        { "id": "silencio", "descricao": "Apenas silêncio ou calma interior" },
+        { "id": "tregua", "descricao": "Apenas uma trégua militar entre inimigos" }
+      ],
+      "ocorrencias": [
+        { "passagem": "gn37", "faceta": "bemestar", "nota": "Jacó manda José ver o shalom dos irmãos e o shalom do rebanho. As traduções escrevem \"se vão bem\". É bem-estar concreto, de pessoas e de animais." },
+        { "passagem": "gn43", "faceta": "bemestar", "nota": "José pergunta pelo shalom deles e do pai: \"vosso pai está bem?\". É o cumprimento cotidiano." },
+        { "passagem": "jz6", "faceta": "dom", "nota": "Gideão acha que vai morrer por ter visto o anjo. Deus diz \"shalom a ti, não morrerás\", e Gideão chama o altar de \"o Senhor é shalom\"." },
+        { "passagem": "nm6", "faceta": "dom", "nota": "A bênção sacerdotal termina com \"o Senhor te dê shalom\". É algo que só Deus concede." },
+        { "passagem": "jr29", "faceta": "comunidade", "nota": "Aos exilados: procurem o shalom da cidade, que é a Babilônia, a cidade inimiga, porque no shalom dela vocês terão shalom." },
+        { "passagem": "sl122", "faceta": "comunidade", "nota": "\"Orai pelo shalom de Jerusalém.\" Shalom dentro dos muros, pelos irmãos e amigos." },
+        { "passagem": "is9", "faceta": "reino", "nota": "O menino prometido será \"Príncipe da Paz\", e o shalom do seu governo não terá fim, sobre o trono de Davi." },
+        { "passagem": "is53", "faceta": "restauracao", "nota": "\"O castigo que nos traz a paz estava sobre ele.\" Shalom aparece junto com cura: restauração conquistada pelo sofrimento do servo." }
+      ],
+      "confirmar_apos": 4,
+      "sintese": "Shalom é inteireza: tudo como deveria estar, nas pessoas, nas relações, nos rebanhos e na cidade. É o bem-estar cotidiano e, ao mesmo tempo, um dom de Deus. Deve ser buscado até pela cidade inimiga, é prometido como marca do reinado do Messias e é restaurado pelo sofrimento do servo."
+    }
+  ]
+}

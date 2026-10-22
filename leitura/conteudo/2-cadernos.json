@@ -1,0 +1,145 @@
+{
+  "prototipo": "cadernos",
+  "versao": 1,
+  "tema": "O Cordeiro",
+  "pergunta_central": "Isaque pergunta \"onde está o cordeiro?\". A Bíblia responde?",
+  "convite": {
+    "pergunta": "O professor deixou duas anotações soltas na primeira página. Qual você abre?",
+    "opcoes": [
+      { "texto": "A pergunta de um menino a caminho do monte", "leva_a": "isaque" },
+      { "texto": "Uma certeza sobre a Páscoa", "leva_a": "pascoa" },
+      { "texto": "Vou folhear o caderno inteiro primeiro", "leva_a": null }
+    ]
+  },
+  "estudioso": {
+    "nome": "Prof. Tomé Vasconcelos",
+    "apresentacao": "Professor de Antigo Testamento aposentado. Passou os últimos anos tentando seguir uma única imagem, o cordeiro, de Gênesis ao Apocalipse. Os cadernos chegaram a você numa caixa, com páginas soltas, setas para lugar nenhum e uma última página em branco. Ele erra às vezes e sabe disso. Escreve a lápis para poder apagar."
+  },
+  "passagens": {
+    "gn22": { "ref": "Gn 22:6-14", "osis": "Gen.22.6-Gen.22.14", "contexto": "Gen.22.1-Gen.22.19" },
+    "ex12a": { "ref": "Êx 12:3-13", "osis": "Exod.12.3-Exod.12.13" },
+    "ex12b": { "ref": "Êx 12:43-46", "osis": "Exod.12.43-Exod.12.46" },
+    "lv4": { "ref": "Lv 4:27-35", "osis": "Lev.4.27-Lev.4.35" },
+    "is53": { "ref": "Is 53:4-12", "osis": "Isa.53.4-Isa.53.12", "contexto": "Isa.52.13-Isa.53.12" },
+    "jo1": { "ref": "Jo 1:29-36", "osis": "John.1.29-John.1.36" },
+    "jo19": { "ref": "Jo 19:31-37", "osis": "John.19.31-John.19.37", "contexto": "John.19.14-John.19.37" },
+    "co5": { "ref": "1Co 5:6-8", "osis": "1Cor.5.6-1Cor.5.8" },
+    "ap5": { "ref": "Ap 5:6-10", "osis": "Rev.5.6-Rev.5.10", "contexto": "Rev.5.1-Rev.5.14" }
+  },
+  "anotacoes": [
+    {
+      "id": "isaque",
+      "inicial": true,
+      "estado": "pergunta",
+      "texto": "Isaque pergunta: \"onde está o cordeiro?\". Abraão diz que Deus proverá. Mas, no fim, o que aparece no monte é mesmo um cordeiro? Conferir com calma.",
+      "passagem": "gn22",
+      "acao_esperada": "completar",
+      "evidencia": ["Gen.22.13"],
+      "dica": "Gen.22.13-Gen.22.14",
+      "revelacao": "O que aparece é um carneiro, não um cordeiro. E o nome que Abraão dá ao lugar fala no futuro: \"no monte do Senhor se proverá\". A pergunta de Isaque fica, a rigor, sem resposta.",
+      "nota_do_estudioso_depois": "Então o texto deixa a pergunta aberta de propósito? Alguém vai responder isso mais tarde. Vou procurar.",
+      "libera": ["joao"]
+    },
+    {
+      "id": "pascoa",
+      "inicial": true,
+      "estado": "hipotese",
+      "texto": "Certeza: na Páscoa, o cordeiro é morto para pagar pelos pecados do povo. Por isso o sangue nas portas.",
+      "passagem": "ex12a",
+      "acao_esperada": "corrigir",
+      "evidencia": ["Exod.12.13"],
+      "dica": "Exod.12.12-Exod.12.13",
+      "retorno_erro": "Esse versículo descreve o ritual. Procure o que o próprio texto diz que o sangue faz.",
+      "revelacao": "O texto não fala de pecado aqui. O sangue é um sinal: quando o Senhor o vê, passa por cima e o juízo não atinge aquela casa. A Páscoa é proteção e libertação.",
+      "nota_do_estudioso_depois": "Errei, e foi bom errar. O texto fala de sinal e proteção, não de pagar pecado. Então de onde tirei a ideia de um cordeiro que \"tira o pecado\"?",
+      "libera": ["ossos", "levitico"]
+    },
+    {
+      "id": "ossos",
+      "estado": "interrompida",
+      "texto": "Regra estranha na Páscoa: nenhum osso do cordeiro pode ser quebrado. Por que alguém registraria isso? Tenho certeza de que vi isso de novo num lugar inesperado, mas não anotei onde...",
+      "passagem": "ex12b",
+      "acao_esperada": "completar",
+      "evidencia": ["Exod.12.46"],
+      "dica": "Exod.12.45-Exod.12.46",
+      "revelacao": "A regra está lá: o cordeiro é comido inteiro, numa só casa, e nenhum osso é quebrado. Um detalhe pequeno, fácil de esquecer.",
+      "libera": ["cruz"]
+    },
+    {
+      "id": "levitico",
+      "estado": "pergunta",
+      "texto": "Se não é a Páscoa, onde um cordeiro \"leva pecado\"? Procurar nas leis de sacrifício de Levítico.",
+      "passagem": "lv4",
+      "acao_esperada": "completar",
+      "evidencia": ["Lev.4.32", "Lev.4.35"],
+      "dica": "Lev.4.32-Lev.4.35",
+      "revelacao": "Aqui está: uma cordeira oferecida como oferta pelo pecado, e \"lhe será perdoado\". Agora existem dois cordeiros diferentes, o da Páscoa (proteção) e o do sacrifício (perdão).",
+      "nota_do_estudioso_depois": "Dois cordeiros, duas funções. Alguém junta os dois?",
+      "libera": ["servo"]
+    },
+    {
+      "id": "servo",
+      "estado": "hipotese",
+      "texto": "Isaías compara o servo a um cordeiro só por causa do silêncio dele diante dos agressores. É uma imagem de mansidão, nada mais.",
+      "passagem": "is53",
+      "acao_esperada": "corrigir",
+      "evidencia": ["Isa.53.10", "Isa.53.12", "Isa.53.6"],
+      "dica": "Isa.53.10-Isa.53.12",
+      "retorno_erro": "Esse versículo mostra o silêncio. Procure o que o texto diz que acontece com o pecado.",
+      "revelacao": "Não é só mansidão. O Senhor faz cair sobre o servo a iniquidade de todos (v. 6), a vida dele é oferecida como oferta pelo pecado (v. 10) e ele leva o pecado de muitos (v. 12). O cordeiro manso é também o sacrifício.",
+      "nota_do_estudioso_depois": "Eu estava lendo só a metade do capítulo. O servo é a oferta. A pergunta de Isaque está ficando perto.",
+      "libera": ["joao"]
+    },
+    {
+      "id": "joao",
+      "estado": "pergunta",
+      "texto": "João Batista: \"Eis o Cordeiro de Deus, que tira o pecado do mundo\". Ele está pensando na Páscoa, em Levítico, em Isaías... ou em tudo de uma vez?",
+      "passagem": "jo1",
+      "acao_esperada": "completar",
+      "evidencia": ["John.1.29"],
+      "dica": "John.1.29-John.1.30",
+      "revelacao": "\"Tira o pecado\" vem do sacrifício e de Isaías, não da Páscoa. \"Do mundo\" vai além de Israel. E \"Cordeiro de Deus\" faz lembrar o monte de Gênesis 22: Deus mesmo providencia o cordeiro.",
+      "nota_do_estudioso_depois": "\"Cordeiro DE DEUS.\" Abraão disse que Deus proveria o cordeiro. O texto não faz a ligação explicitamente... mas eu não consigo deixar de ver.",
+      "libera": ["paulo", "trono"]
+    },
+    {
+      "id": "cruz",
+      "estado": "interrompida",
+      "texto": "Achei! João 19 diz \"nenhum dos seus ossos será quebrado\" e chama isso de cumprimento da Escritura. Mas qual Escritura? Êxodo? Algum salmo? Os dois? Preciso",
+      "passagem": "jo19",
+      "acao_esperada": "completar",
+      "evidencia": ["John.19.36"],
+      "dica": "John.19.33-John.19.36",
+      "revelacao": "João liga a morte de Jesus à regra do cordeiro pascal (Êx 12:46) e também ecoa o justo protegido do Salmo 34:20. Leia o contexto: é o dia da preparação da Páscoa (Jo 19:14). Para João, Jesus morre como o cordeiro pascal.",
+      "libera": ["paulo"]
+    },
+    {
+      "id": "paulo",
+      "estado": "hipotese",
+      "texto": "Só João faz a ligação de Cristo com o cordeiro da Páscoa. Paulo nunca diria isso.",
+      "passagem": "co5",
+      "acao_esperada": "corrigir",
+      "evidencia": ["1Cor.5.7"],
+      "dica": "1Cor.5.7-1Cor.5.8",
+      "revelacao": "\"Cristo, nossa Páscoa, foi sacrificado.\" Paulo faz a mesma ligação, e de passagem, como algo que os leitores já conheciam.",
+      "nota_do_estudioso_depois": "Errei outra vez. Se Paulo diz isso de passagem, a ideia já era antiga.",
+      "libera": []
+    },
+    {
+      "id": "trono",
+      "estado": "pergunta",
+      "texto": "Apocalipse: o Cordeiro está de pé, mas \"como tendo sido morto\". Morto e de pé? E o que ele faz com o próprio sangue?",
+      "passagem": "ap5",
+      "acao_esperada": "completar",
+      "evidencia": ["Rev.5.6", "Rev.5.9"],
+      "dica": "Rev.5.6-Rev.5.9",
+      "revelacao": "O Cordeiro morto está vivo, no centro do trono. Com o seu sangue, ele comprou para Deus pessoas de toda tribo, língua, povo e nação. É a libertação da Páscoa, o perdão do sacrifício e o \"mundo\" de João, juntos.",
+      "libera": []
+    }
+  ],
+  "pergunta_final": {
+    "texto": "A última página do professor está em branco, exceto pelo título: \"Onde está o cordeiro?\". Escreva a resposta que ele não chegou a escrever.",
+    "requer": ["isaque", "pascoa", "servo", "joao", "trono"],
+    "sintese": "Em Gênesis 22, a pergunta fica aberta. A Páscoa traz um cordeiro que protege do juízo e liberta. Levítico traz um cordeiro que leva o pecado. Isaías funde mansidão e sacrifício num servo. João anuncia Jesus como o Cordeiro de Deus que tira o pecado do mundo e o mostra morrendo como o cordeiro pascal. O Apocalipse mostra esse Cordeiro morto e vivo, que resgata pessoas de todas as nações. A resposta a Isaque: Deus mesmo providenciou o cordeiro."
+  }
+}

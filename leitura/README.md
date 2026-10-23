@@ -9,26 +9,30 @@ dedução) foram juntadas num jogo só.
 
 ## Como o jogo funciona
 
-Duas telas em lousa de tela cheia. Arraste para mover; aproxime com pinça,
-roda do mouse ou os botões + e −. O botão ⤢ enquadra tudo.
+Duas telas num quadro de tela cheia (papel pontilhado, claro ou escuro
+conforme o tema do aparelho). Arraste para mover; aproxime com pinça, roda
+do mouse ou os botões + e −. O botão ⤢ enquadra tudo.
 
-1. **Sistema:** a tela de seleção. Cada planeta é uma constelação
-   (um tema).
-   - Colorido: você já visitou.
-   - Cinza: você ouviu falar, mas ainda não foi.
-   - Só o contorno: ainda desconhecido.
+1. **Temas:** a tela de seleção. Cada círculo é um tema.
+   - Preenchido com a cor do tema: você já começou.
+   - Só o contorno: disponível, ainda não começado.
+   - Tracejado com "?": ainda desconhecido.
 
-   As luas são as palavras hebraicas daquele tema, preenchidas quando
-   descobertas. Toque num planeta e em "Ver entradas".
-2. **Constelação:** o grafo de perguntas.
+   Os pontinhos embaixo são as palavras hebraicas do tema, preenchidos
+   quando descobertos. Toque num tema e em "Abrir".
+2. **Mapa de perguntas:** o grafo do tema.
    - **Nó de passagem:** um "?" aparece quando uma pista aponta para ele.
      Você lê e marca o versículo que responde. Alguns deixam prever a
      resposta antes de ler.
+   - **Nós novos:** ao resolver um nó, nenhuma janela abre. As perguntas
+     liberadas aparecem no mapa com um selo "!", que some quando você as
+     abre. Um aviso no rodapé oferece "Ver o que entendi".
    - **Palavras que brilham:** durante a leitura, certas palavras do
      texto brilham. Tocar numa delas revela a palavra hebraica por trás
-     (por exemplo, "repousou" → *shabat*), e o nó da palavra surge na
-     constelação. Numa passagem que mostra uma faceta da palavra, você
-     escolhe qual é e a resposta é conferida na hora.
+     (por exemplo, "repousou" → *shabat*), e o nó da palavra surge no mapa
+     com "!". Numa passagem que mostra uma faceta da palavra, você escolhe
+     qual é e a resposta é conferida na hora. Um número no nó da palavra
+     indica facetas esperando resposta.
    - **Nó de palavra:** mostra as letras (nome, som, valor, papel na
      palavra), a raiz e a família dela, todas as palavras do texto já
      encontradas que traduzem essa palavra, e as facetas descobertas.
@@ -41,7 +45,7 @@ roda do mouse ou os botões + e −. O botão ⤢ enquadra tudo.
      ficam marcadas em vermelho até serem trocadas.
 
 O menu (☰) tem a tradução, o diário, o encerramento da sessão e a opção
-de recomeçar a constelação.
+de recomeçar o tema.
 
 ## Como rodar
 
@@ -53,15 +57,15 @@ bloqueia a leitura dos JSON.
 ```
 leitura/
   index.html          página do jogo (estilos da lousa e das janelas)
-  app.js              telas Sistema e Constelação, palavras, síntese, menu
+  app.js              telas Temas e mapa de perguntas, palavras, síntese, menu
   lousa.js            superfície SVG em tela cheia com arrastar e zoom
   shared/base.js      API da Bíblia, leitor (com palavras que brilham), janelas, progresso, diário
   shared/base.css     estilos comuns, mobile primeiro, tema claro/escuro
-  conteudo/sistema.json   planetas da tela de seleção
-  conteudo/descanso.json  a constelação Descanso
+  conteudo/sistema.json   temas da tela de seleção
+  conteudo/descanso.json  o tema Descanso
 ```
 
-O progresso de cada constelação e o diário ficam no `localStorage` do
+O progresso de cada tema e o diário ficam no `localStorage` do
 aparelho.
 
 ### Tradução (API da AO Lab)
@@ -84,11 +88,11 @@ o leitor resolve na tradução escolhida.
 ```jsonc
 { "corpos": [
   { "id": "descanso", "titulo": "Descanso", "pacote": "descanso.json", "cor": "#d9a441", "raio": 62 },
-  { "id": "cordeiro", "titulo": "O Cordeiro", "pacote": null, "cor": "#c7685a", "raio": 48, "luas": 2 }  // sem pacote: desconhecido
+  { "id": "cordeiro", "titulo": "O Cordeiro", "pacote": null, "cor": "#c7685a", "raio": 48, "luas": 2 }  // sem pacote: desconhecido; "luas" = quantos pontos de palavra mostrar
 ] }
 ```
 
-### Pacote de constelação
+### Pacote de tema
 
 ```jsonc
 {

@@ -20,10 +20,11 @@
     svg.append(defs, grade, mundo);
     container.append(svg);
 
-    for (let i = -4000; i <= 4000; i += 100) {
-      grade.append(el('line', { x1: i, y1: -4000, x2: i, y2: 4000 }));
-      grade.append(el('line', { x1: -4000, y1: i, x2: 4000, y2: i }));
-    }
+    // Grade de pontos, como papel pontilhado.
+    const padrao = el('pattern', { id: 'lousa-pontos', width: 40, height: 40, patternUnits: 'userSpaceOnUse' });
+    padrao.append(el('circle', { class: 'lousa-ponto', cx: 20, cy: 20, r: 2.2 }));
+    defs.append(padrao);
+    grade.append(el('rect', { x: -4000, y: -4000, width: 8000, height: 8000, fill: 'url(#lousa-pontos)' }));
 
     let vb = { x: -500, y: -500, w: 1000, h: 1000 };
     let base = 1000; // largura do enquadramento atual, referência para os limites de zoom

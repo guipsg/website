@@ -1,6 +1,6 @@
 // Laboratório de leitura — o jogo.
-// Duas telas sobre a mesma lousa: o Sistema (seleção de constelações, como o mapa
-// do ship log) e a Constelação (o grafo de perguntas). Palavras hebraicas são
+// Duas telas sobre o mesmo quadro: Temas (a seleção) e o mapa de perguntas de um
+// tema (o grafo, inspirado no ship log de Outer Wilds). Palavras hebraicas são
 // descobertas tocando nas palavras que brilham durante a leitura, e a síntese
 // final se monta arrastando as palavras aprendidas para os lugares certos.
 (() => {
@@ -10,12 +10,11 @@
   const lousa = Lousa.criar(document.getElementById('lousa'));
   const $ = (s) => document.querySelector(s);
   const TIPOS = { tema: 'tema', citacao: 'citação', alusao: 'alusão', mesma_palavra: 'mesma palavra' };
-  const CORES = { tema: '#8b9ab8', citacao: '#f0a040', alusao: '#b48ce0', mesma_palavra: '#6cc2a8' };
-  const INICIAL = { visitado: false, resolvidos: [], vistos: [], erros: {}, foco: {}, previsoes: {}, achadas: {}, facetasOk: {}, definicoes: {}, sintese: {}, convite: false };
+    const INICIAL = { visitado: false, resolvidos: [], vistos: [], erros: {}, foco: {}, previsoes: {}, achadas: {}, palavrasVistas: [], facetasOk: {}, definicoes: {}, sintese: {}, convite: false };
 
   let sistema = null;
   const pacotes = {}; // id do corpo -> dados do pacote
-  let tela = null; // { tipo: 'sistema' } ou a constelação aberta
+  let tela = null; // { tipo: 'sistema' } ou o mapa de um tema
   let selecionado = null;
 
   iniciar().catch((e) => {
@@ -71,15 +70,15 @@
   // ======================================================================
   // Sistema: a tela de seleção
   // ======================================================================
-  // Em pé, os planetas se empilham; deitado, ficam em fila como no mapa.
+  // Em pé, os temas se empilham; deitado, ficam em fila.
   const emPe = () => innerHeight > innerWidth * 1.1;
-  const posCorpo = (i) => (emPe() ? { x: 0, y: -60 + i * 300 } : { x: -180 + i * 290, y: 0 });
+  const posCorpo = (i) => (emPe() ? { x: 0, y: i * 300 } : { x: i * 290, y: 0 });
 
   function mostrarSistema() {
     const n = sistema.corpos.length;
-    const caixa = () => (emPe() ? { x: -170, y: -390, w: 340, h: 300 * (n - 1) + 700 } : { x: -480, y: -200, w: 290 * (n - 1) + 360, h: 520 });
+    const caixa = () => (emPe() ? { x: -150, y: -190, w: 300, h: 300 * (n - 1) + 410 } : { x: -150, y: -110, w: 290 * (n - 1) + 300, h: 330 });
     tela = { tipo: 'sistema', enquadrar: () => lousa.enquadrar(caixa(), 60) };
-    hud('Sistema', 'Escolha uma constelação · arraste e aproxime', false);
+    hud('Temas', 'Escolha um tema · arraste e aproxime', false);
     desenharSistema();
     tela.enquadrar();
     mostrarInfo();
@@ -89,33 +88,26 @@
     lousa.limpar();
     const M = lousa.mundo;
     garantirDefs();
-    // A luz à esquerda, como o sol do mapa.
-    const fim = posCorpo(sistema.corpos.length - 1);
-    if (emPe()) {
-      M.append(el('circle', { cx: 0, cy: -620, r: 300, fill: 'url(#sol)' }));
-      M.append(el('line', { x1: 0, y1: -320, x2: 0, y2: fim.y + 200, stroke: '#2a3758', 'stroke-width': 2 }));
-    } else {
-      M.append(el('circle', { cx: -720, cy: 0, r: 300, fill: 'url(#sol)' }));
-      M.append(el('line', { x1: -420, y1: 0, x2: fim.x + 200, y2: 0, stroke: '#2a3758', 'stroke-width': 2 }));
-    }
     sistema.corpos.forEach((c, i) => {
       const { x, y } = posCorpo(i);
       const prog = progressoDe(c.id);
       const estado = !c.pacote ? 'desconhecido' : prog && prog.visitado ? 'visitado' : 'ouvido';
-      const g = el('g', { class: `corpo ${selecionado === c.id ? 'selecionado' : ''}`, transform: `translate(${x},${y})`, tabindex: 0, role: 'button', 'aria-label': estado === 'desconhecido' ? 'Lugar desconhecido' : c.titulo });
-      g.append(el('circle', { class: 'anel', r: c.raio + 18 }));
-      if (estado === 'desconhecido') g.append(el('path', { class: 'contorno', d: circuloTorto(c.raio, c.id) }));
-      else g.append(planeta(c, estado === 'ouvido'));
-      // Luas: as palavras da constelação.
+      const g = el('g', { class: `corpo ${selecionado === c.id ? 'selecionado' : ''}`, transform: `translate(${x},${y})`, tabindex: 0, role: 'button', 'aria-label': estado === 'desconhecido' ? 'Tema desconhecido' : c.titulo });
+      const R = 62;
+      g.append(el('circle', { class: 'anel', r: R + 14 }));
+      // Visitado: a cor do tema. Conhecido: só o contorno. Desconhecido: tracejado.
+      g.append(el('circle', { class: `medalha ${estado}`, r: R, ...(estado === 'visitado' ? { fill: c.cor } : {}) }));
+      const letra = el('text', { class: `medalha-letra ${estado}` });
+      letra.textContent = estado === 'desconhecido' ? '?' : c.titulo.replace(/^(O|A) /, '')[0];
+      g.append(letra);
+      // Um ponto por palavra do tema, preenchido quando descoberta.
       const pal = pacotes[c.id]?.palavras || Array.from({ length: c.luas || 1 }, (_, k) => ({ id: `${c.id}-${k}` }));
       pal.forEach((w, k) => {
-        const lx = (k - (pal.length - 1) / 2) * 46;
         const achada = prog && (prog.achadas?.[w.id] || []).length > 0;
-        if (achada) g.append(el('circle', { class: 'lua-achada', cx: lx, cy: c.raio + 52, r: 13 }));
-        else g.append(el('path', { class: 'contorno', d: circuloTorto(13, w.id, 0.12), transform: `translate(${lx},${c.raio + 52})`, 'stroke-width': 2.5 }));
+        g.append(el('circle', { class: `ponto-palavra ${achada ? 'achada' : ''}`, cx: (k - (pal.length - 1) / 2) * 30, cy: R + 30, r: 8 }));
       });
       if (estado !== 'desconhecido') {
-        const t = el('text', { class: 'nome-corpo', y: c.raio + 104 });
+        const t = el('text', { class: 'nome-corpo', y: R + 76 });
         t.textContent = c.titulo;
         g.append(t);
       }
@@ -134,12 +126,12 @@
     const info = $('#info');
     const c = sistema.corpos.find((x) => x.id === selecionado);
     if (!c) {
-      Lab.mount(info, h('p', { style: 'margin:0' }, 'Toque num planeta para ver as entradas.'));
+      Lab.mount(info, h('p', { style: 'margin:0' }, 'Toque num tema para abrir.'));
       info.hidden = false;
       return;
     }
     if (!c.pacote) {
-      Lab.mount(info, h('h2', {}, '? ? ?'), h('p', {}, 'Ainda nenhuma pista leva até este lugar.'));
+      Lab.mount(info, h('h2', {}, '? ? ?'), h('p', {}, 'Ainda nenhuma pista leva até este tema.'));
       info.hidden = false;
       return;
     }
@@ -149,47 +141,24 @@
     Lab.mount(
       info,
       h('h2', {}, c.titulo),
-      h('p', {}, p.visitado ? `${p.resolvidos.length} de ${d.nos.length} entendidos · ${palavras} de ${d.palavras.length} palavras` : 'Você ouviu falar deste lugar, mas ainda não foi até lá.'),
-      h('button', { class: 'btn primary', onclick: () => abrirConstelacao(c) }, 'Ver entradas'),
+      h('p', {}, p.visitado ? `${p.resolvidos.length} de ${d.nos.length} entendidos · ${palavras} de ${d.palavras.length} palavras` : 'Você ainda não começou este tema.'),
+      h('button', { class: 'btn primary', onclick: () => abrirConstelacao(c) }, p.visitado ? 'Continuar' : 'Abrir'),
     );
     info.hidden = false;
   }
 
-  function planeta(c, cinza) {
-    const g = el('g', cinza ? { filter: 'url(#cinza)' } : {});
-    g.append(el('circle', { r: c.raio, fill: `url(#grad-${c.id})` }));
-    const rnd = semente(c.id);
-    for (let i = 0; i < 6; i++) {
-      const a = rnd() * Math.PI * 2;
-      const d = rnd() * c.raio * 0.6;
-      g.append(el('ellipse', { cx: Math.cos(a) * d, cy: Math.sin(a) * d, rx: c.raio * (0.15 + rnd() * 0.25), ry: c.raio * (0.08 + rnd() * 0.12), fill: '#ffffff', opacity: 0.12 + rnd() * 0.12, transform: `rotate(${rnd() * 60 - 30})` }));
-    }
-    g.append(el('circle', { r: c.raio, fill: 'none', stroke: 'rgba(255,255,255,0.35)', 'stroke-width': 2 }));
-    return g;
-  }
-
   function garantirDefs() {
-    if (lousa.defs.querySelector('#sol')) return;
     const D = lousa.defs;
-    const grad = (id, paradas) => {
-      const r = el('radialGradient', { id, cx: '38%', cy: '35%', r: '70%' });
-      paradas.forEach(([o, cor]) => r.append(el('stop', { offset: o, 'stop-color': cor })));
-      D.append(r);
-    };
-    grad('sol', [['0%', '#fff2b0'], ['35%', '#ffb340'], ['75%', '#e2541f'], ['100%', '#a3200f']]);
-    for (const c of sistema.corpos) grad(`grad-${c.id}`, [['0%', '#ffffff'], ['25%', c.cor], ['100%', '#10151f']]);
-    const f = el('filter', { id: 'cinza' });
-    f.append(el('feColorMatrix', { type: 'saturate', values: '0' }));
-    D.append(f);
+    if (D.querySelector('#seta-tema')) return;
     for (const t of Object.keys(TIPOS)) {
       const m = el('marker', { id: `seta-${t}`, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 5, markerHeight: 5, orient: 'auto-start-reverse' });
-      m.append(el('path', { d: 'M0,0 L10,5 L0,10 z', fill: CORES[t] }));
+      m.append(el('path', { d: 'M0,0 L10,5 L0,10 z', class: `seta-${t}` }));
       D.append(m);
     }
   }
 
   // ======================================================================
-  // Constelação
+  // Mapa de perguntas de um tema
   // ======================================================================
   function abrirConstelacao(corpo) {
     $('#info').hidden = true;
@@ -261,6 +230,7 @@
         g.append(el('circle', { r: raio(n) }));
         g.append(txt('icone', res ? '✓' : '?'));
         rotulo(g, n.titulo, raio(n));
+        if (!res && !S.vistos.includes(n.id)) selo(g, raio(n) * 0.75, -raio(n) * 0.75, '!');
         M.append(g);
       }
       for (const w of pals) {
@@ -268,13 +238,9 @@
         g.append(el('rect', { x: -44, y: -32, width: 88, height: 64, rx: 14 }));
         g.append(txt('icone', w.original.replace(/[\u0591-\u05C7]/g, '')));
         rotulo(g, w.transliteracao, 32);
-        if (facetasPendentes(w).length) {
-          g.append(el('circle', { class: 'selo', cx: 42, cy: -30, r: 13 }));
-          const s = txt('selo-txt', '!');
-          s.setAttribute('x', 42);
-          s.setAttribute('y', -30);
-          g.append(s);
-        }
+        // "!" para palavra nova; um número quando há facetas esperando resposta.
+        if (!S.palavrasVistas.includes(w.id)) selo(g, 42, -30, '!');
+        else if (facetasPendentes(w).length) selo(g, 42, -30, String(facetasPendentes(w).length), 'numero');
         M.append(g);
       }
       destaque = new Set();
@@ -306,13 +272,7 @@
       }
       if (primeira) {
         destaque.add(wid(w));
-        await modal({
-          title: 'Você encontrou uma palavra',
-          body: h('div', {}, h('p', { class: 'heb-grande' }, w.original), h('p', { class: 'translit' }, w.transliteracao),
-            h('p', {}, `"${texto}", em ${fmtRef(b.verso)}, traduz a palavra hebraica ${w.transliteracao}.`), b.nota && h('p', { class: 'muted' }, b.nota),
-            h('p', {}, 'Ela agora aparece na constelação.')),
-          actions: [{ label: 'Continuar lendo', value: true, primary: true }],
-        });
+        toast(`Nova palavra: "${texto}" traduz ${w.transliteracao}. Ela aparece no mapa com "!".`, 'ok');
       } else {
         toast(`"${texto}" → ${w.transliteracao}${b.nota ? `. ${b.nota}` : ''}`);
       }
@@ -347,6 +307,7 @@
 
     // ---------------- nós de passagem ----------------
     async function abrir(n) {
+      $('#info').hidden = true;
       if (!S.vistos.includes(n.id)) {
         S.vistos.push(n.id);
         prog.save();
@@ -367,10 +328,10 @@
       const faltamNos = (n.requer || []).filter((id) => !isResolved(id)).length;
       const faltamPal = (n.requer_palavras || []).filter((id) => !descoberta(palavras.get(id))).length;
       if (faltamNos || faltamPal) {
-        const partes = [faltamNos && `${faltamNos} ${faltamNos === 1 ? 'pergunta' : 'perguntas'} da constelação`, faltamPal && `${faltamPal} ${faltamPal === 1 ? 'palavra brilhando no texto' : 'palavras brilhando no texto'}`].filter(Boolean);
+        const partes = [faltamNos && `${faltamNos} ${faltamNos === 1 ? 'pergunta' : 'perguntas'} do mapa`, faltamPal && `${faltamPal} ${faltamPal === 1 ? 'palavra brilhando no texto' : 'palavras brilhando no texto'}`].filter(Boolean);
         await modal({
           title: n.titulo,
-          body: h('div', {}, h('p', {}, n.pergunta), h('p', { class: 'aviso' }, `Esta pergunta junta várias partes da constelação. Antes, ainda falta encontrar ${partes.join(' e ')}.`)),
+          body: h('div', {}, h('p', {}, n.pergunta), h('p', { class: 'aviso' }, `Esta pergunta junta várias partes do mapa. Antes, ainda falta encontrar ${partes.join(' e ')}.`)),
         });
         return render();
       }
@@ -416,13 +377,23 @@
       buzz(40);
       destaque = new Set(n.pistas.map((p) => p.para).filter((id) => !isResolved(id)));
       render();
-      await modal({
-        title: `✓ ${n.titulo}`,
-        body: h('div', {}, h('div', { class: 'revelacao' }, n.revelacao), previsaoFeita(n), pistasDe(n, true)),
-        actions: [{ label: 'Ver na lousa', value: true, primary: true }],
-      });
-      destaque = new Set(n.pistas.map((p) => p.para).filter((id) => !isResolved(id)));
-      render();
+      avisoEntendido(n);
+    }
+
+    // Sem janela: os nós novos aparecem no mapa com "!", e o que se entendeu
+    // fica a um toque, num aviso no rodapé.
+    function avisoEntendido(n) {
+      const info = $('#info');
+      const novos = n.pistas.filter((p) => !S.vistos.includes(p.para) && !isResolved(p.para)).length;
+      Lab.mount(
+        info,
+        h('h2', {}, `✓ ${n.titulo}`),
+        h('p', {}, novos ? `${novos} ${novos === 1 ? 'pergunta nova apareceu' : 'perguntas novas apareceram'} no mapa com "!".` : 'Toque no nó quando quiser rever.'),
+        h('div', { class: 'linha' },
+          h('button', { class: 'btn primary', onclick: () => { info.hidden = true; abrir(n); } }, 'Ver o que entendi'),
+          h('button', { class: 'btn', onclick: () => (info.hidden = true) }, 'Fechar')),
+      );
+      info.hidden = false;
     }
 
     function previsaoFeita(n) {
@@ -444,6 +415,10 @@
 
     // ---------------- nó de palavra ----------------
     function abrirPalavra(w) {
+      if (!S.palavrasVistas.includes(w.id)) {
+        S.palavrasVistas.push(w.id);
+        prog.save();
+      }
       let letraSel = null;
       const corpoEl = h('div', {});
       const desenhar = () => {
@@ -470,7 +445,7 @@
             const o = w.ocorrencias.find((x) => x.verso === a.verso);
             return h('div', { class: 'achado-item' }, h('b', {}, a.texto), ` · ${fmtRef(a.verso)}`, o?.nota && h('div', { class: 'nota' }, o.nota));
           }),
-          faltam > 0 && h('p', { class: 'muted', style: 'font-size:14px' }, `Mais ${faltam} ${faltam === 1 ? 'uso brilha' : 'usos brilham'} em passagens da constelação.`),
+          faltam > 0 && h('p', { class: 'muted', style: 'font-size:14px' }, `Mais ${faltam} ${faltam === 1 ? 'uso brilha' : 'usos brilham'} em passagens deste tema.`),
           h('h3', {}, `Facetas (${facetasOk(w).length} de ${w.facetas.length})`),
           w.facetas.filter((f) => facetasOk(w).includes(f.id)).map((f) => h('div', { class: 'faceta-linha certa' }, h('span', { class: 'desc' }, `✓ ${f.descricao}`), h('span', { class: 'muted' }, fmtRef(passagemDe(f))))),
           facetasPendentes(w).map((f) => h('div', { class: 'faceta-linha' }, h('span', { class: 'desc' }, `${fmtRef(passagemDe(f))}: o que a palavra mostra aqui?`),
@@ -642,7 +617,7 @@
       render();
       await modal({ title: `✓ ${n.titulo}`, body: h('div', { class: 'revelacao' }, n.revelacao), actions: [{ label: 'Continuar', value: true, primary: true }] });
       const r = await modal({
-        title: 'Constelação completa',
+        title: 'Tema completo',
         body: h('p', {}, 'Você chegou à síntese. Quer registrar a sessão no diário agora?'),
         actions: [
           { label: 'Continuar explorando', value: null },
@@ -676,7 +651,7 @@
       { k: 'traducao', texto: `Tradução: ${t ? t.shortName || t.name : 'escolher'}` },
       { k: 'diario', texto: 'Diário' },
       { k: 'encerrar', texto: 'Encerrar a sessão (diário)' },
-      tela?.recomecar && { k: 'recomecar', texto: 'Recomeçar esta constelação' },
+      tela?.recomecar && { k: 'recomecar', texto: 'Recomeçar este tema' },
       { k: 'sobre', texto: 'Sobre o texto bíblico' },
     ].filter(Boolean);
     const op = await Lab.escolha({ title: 'Menu', opcoes });
@@ -689,8 +664,8 @@
     else if (op.k === 'encerrar') Lab.endSession('constelacao');
     else if (op.k === 'recomecar') {
       const r = await modal({
-        title: 'Recomeçar esta constelação?',
-        body: h('p', {}, 'Apaga o progresso desta constelação. O diário é mantido.'),
+        title: 'Recomeçar este tema?',
+        body: h('p', {}, 'Apaga o progresso deste tema. O diário é mantido.'),
         actions: [
           { label: 'Cancelar', value: null },
           { label: 'Apagar progresso', value: true, primary: true },
@@ -745,6 +720,13 @@
     t.textContent = s;
     return t;
   }
+  function selo(g, x, y, texto, extra = '') {
+    g.append(el('circle', { class: `selo ${extra}`, cx: x, cy: y, r: 13 }));
+    const t = txt('selo-txt', texto);
+    t.setAttribute('x', x);
+    t.setAttribute('y', y);
+    g.append(t);
+  }
   function linha2(a, b, ra, rb, cls) {
     const d = Math.hypot(b.x - a.x, b.y - a.y) || 1;
     const ux = (b.x - a.x) / d;
@@ -775,38 +757,6 @@
     }
     if (cur) lines.push(cur);
     return lines;
-  }
-  // Gerador pseudoaleatório com semente, para os desenhos não mudarem entre visitas.
-  function semente(str) {
-    let s = 0;
-    for (const ch of str) s = (s * 31 + ch.charCodeAt(0)) >>> 0;
-    return () => {
-      s = (s * 1664525 + 1013904223) >>> 0;
-      return s / 4294967296;
-    };
-  }
-  // Círculo traçado à mão, como os planetas ainda desconhecidos do mapa.
-  function circuloTorto(r, id, var_ = 0.07) {
-    const rnd = semente(id);
-    const N = 18;
-    const pts = Array.from({ length: N }, (_, i) => {
-      const a = (i / N) * Math.PI * 2;
-      const rr = r * (1 + (rnd() - 0.5) * 2 * var_);
-      return [Math.cos(a) * rr, Math.sin(a) * rr];
-    });
-    let d = '';
-    for (let i = 0; i < N; i++) {
-      const [x1, y1] = pts[i];
-      const [x2, y2] = pts[(i + 1) % N];
-      const mx = (x1 + x2) / 2;
-      const my = (y1 + y2) / 2;
-      if (i === 0) {
-        const [xp, yp] = pts[N - 1];
-        d += `M${((xp + x1) / 2).toFixed(1)},${((yp + y1) / 2).toFixed(1)}`;
-      }
-      d += ` Q${x1.toFixed(1)},${y1.toFixed(1)} ${mx.toFixed(1)},${my.toFixed(1)}`;
-    }
-    return d + 'Z';
   }
   // Forças determinísticas sobre o grafo inteiro, para que nada mude de lugar
   // quando novos nós aparecem.

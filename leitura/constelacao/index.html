@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Constelação · Laboratório de leitura</title>
+    <link rel="icon" type="image/svg+xml" href="../../favicon.svg" />
+    <link rel="stylesheet" href="../shared/base.css" />
+    <style>
+      /* O painel do mapa é sempre escuro, como o ship log: mesmo visual nos dois temas. */
+      .painel { background: #0f1420; border: 1px solid #263048; border-radius: var(--radius); overflow: hidden; position: relative; }
+      .painel svg { display: block; width: 100%; height: min(68vh, 560px); touch-action: manipulation; }
+      .painel .grade line { stroke: #1b2438; stroke-width: 1; }
+      .no { cursor: pointer; }
+      .no:focus { outline: none; }
+      .no:focus-visible circle, .no:focus-visible rect { stroke: #ffffff; }
+      .no circle, .no rect { fill: #1a2234; stroke: #5d6b8c; stroke-width: 3; }
+      .no.aberto circle { stroke: #f0a040; }
+      .no.resolvido circle { fill: #20324a; stroke: #7fb4e8; }
+      .no.sintese circle { stroke-width: 5; }
+      .no.palavra rect { fill: #1d2a26; stroke: #6cc2a8; }
+      .no.palavra.completa rect { fill: #213a33; }
+      .no .icone { fill: #f0a040; font: 700 34px var(--sans); text-anchor: middle; dominant-baseline: central; }
+      .no.resolvido .icone { fill: #cfe3f7; font-size: 26px; }
+      .no.palavra .icone { fill: #bfeee0; font: 600 30px 'Times New Roman', serif; }
+      .no .rotulo { fill: #dfe6f3; font: 600 20px var(--sans); text-anchor: middle; }
+      .no.aberto .rotulo { fill: #f6c787; }
+      .no.palavra .rotulo { fill: #9fe0cc; font-style: italic; }
+      .no .selo { fill: #f0a040; stroke: #0f1420; stroke-width: 3; }
+      .no .selo-txt { fill: #1a1408; font: 700 16px var(--sans); text-anchor: middle; dominant-baseline: central; }
+      .no.novo circle, .no.novo rect { animation: pulso 1.4s ease-in-out 3; }
+      @keyframes pulso { 50% { stroke-width: 9; } }
+      .aresta { stroke-width: 3; fill: none; }
+      .aresta.pendente { stroke-dasharray: 10 8; }
+      .e-tema { stroke: #8b9ab8; }
+      .e-citacao { stroke: #f0a040; }
+      .e-alusao { stroke: #b48ce0; }
+      .e-mesma_palavra { stroke: #6cc2a8; }
+      .e-palavra { stroke: #6cc2a8; stroke-width: 2; opacity: 0.8; }
+      .legenda { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); margin: 8px 2px; }
+      .legenda i { display: inline-block; width: 18px; height: 3px; vertical-align: middle; margin-right: 6px; }
+      .contagem { position: absolute; top: 8px; left: 12px; font-size: 13px; color: #8b9ab8; }
+      .pistas-lista { padding-left: 18px; }
+      .pistas-lista li { margin: 6px 0; }
+
+      /* Vista Linha */
+      .palavras-faixa { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+      .chip-palavra { font: inherit; display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; }
+      .chip-palavra .heb { font: 22px 'Times New Roman', serif; }
+      .era { position: relative; margin: 0 0 6px 8px; padding: 0 0 6px 22px; border-left: 3px solid var(--line); }
+      .era h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0; padding: 14px 0 4px; }
+      .era h3::before { content: ''; position: absolute; left: -9px; margin-top: 2px; width: 15px; height: 15px; border-radius: 50%; background: var(--bg); border: 3px solid var(--line); }
+      .era.tocada h3::before { border-color: var(--accent); background: var(--accent); }
+      .item-linha { display: block; width: 100%; text-align: left; font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin: 8px 0; cursor: pointer; }
+      .item-linha.aberto { border-color: var(--accent); }
+      .item-linha.oculto { background: transparent; border-style: dashed; color: var(--muted); font-style: italic; }
+      .item-linha .ref { font-size: 13px; color: var(--muted); }
+      .prev { font-size: 14px; margin-top: 4px; }
+      .prev.acertou { color: var(--ok); }
+      .prev.errou { color: var(--warn); }
+
+      /* Palavra */
+      .heb-grande { font: 60px 'Times New Roman', serif; text-align: center; direction: rtl; margin: 0; line-height: 1.1; }
+      .translit { text-align: center; font-style: italic; color: var(--muted); margin: 0 0 8px; }
+      .letras { display: flex; flex-direction: row-reverse; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+      .letra { font: inherit; width: 64px; padding: 8px 4px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+      .letra .g { font: 32px 'Times New Roman', serif; line-height: 1.1; }
+      .letra .n { font-size: 12px; color: var(--muted); }
+      .letra.raiz { border-color: var(--accent); }
+      .letra.sel { background: var(--sel); }
+      .letra-info { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; font-size: 15px; }
+      .letra-info .cur { font-size: 13px; color: var(--muted); }
+      .raiz { border: 1px solid var(--accent); border-radius: 12px; padding: 10px 12px; margin: 12px 0; }
+      .raiz .heb { font: 24px 'Times New Roman', serif; }
+      .raiz ul { padding-left: 18px; margin: 6px 0 0; }
+      .faceta-linha { border-top: 1px solid var(--line); padding: 10px 0; display: flex; justify-content: space-between; gap: 10px; align-items: center; flex-wrap: wrap; }
+      .faceta-linha .desc { flex: 1; min-width: 0; font-size: 15px; }
+      .faceta-linha.certa .desc { color: var(--ok); }
+      .faceta-linha.errada .desc { color: var(--warn); }
+
+      /* Dedução */
+      .frase { font-family: var(--serif); font-size: 18px; line-height: 2.1; margin: 12px 0; }
+      .lacuna { font: 600 16px var(--sans); border: 0; border-bottom: 2px solid var(--accent); background: var(--sel); color: var(--text); padding: 2px 10px; margin: 0 2px; border-radius: 6px 6px 0 0; cursor: pointer; min-width: 70px; }
+      .lacuna.vazia { background: var(--surface-2); color: var(--muted); }
+      .termos { display: flex; flex-wrap: wrap; gap: 8px; }
+      .termo { font: inherit; font-size: 15px; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--text); cursor: pointer; }
+      .termo.sel { border-color: var(--accent); background: var(--sel); }
+    </style>
+  </head>
+  <body>
+    <main id="app"></main>
+    <script src="../shared/base.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

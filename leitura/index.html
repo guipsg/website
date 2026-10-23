@@ -20,7 +20,7 @@
   <body>
     <main>
       <h1>Laboratório de leitura</h1>
-      <p class="muted">Cinco protótipos para testar <b>como</b> um texto bíblico é absorvido. Cada um tem um tema diferente. Use o diário depois de cada sessão.</p>
+      <p class="muted">Protótipos para testar <b>como</b> um texto bíblico é absorvido. A Constelação junta as mecânicas que funcionaram. Use o diário depois de cada sessão.</p>
 
       <div class="card linha" style="justify-content: space-between">
         <div>
@@ -50,8 +50,7 @@
         'use strict';
         const { h, modal, toast } = Lab;
         const PROTOS = [
-          { id: 'constelacoes', nome: 'Constelações', tema: 'Descanso', desc: 'Um grafo de perguntas: cada "?" abre quando uma pista aponta para ele.' },
-          { id: 'cadernos', nome: 'Cadernos', tema: 'O Cordeiro', desc: 'As anotações de um professor: confirme, corrija ou complete o que ele escreveu.' },
+          { id: 'constelacao', nome: 'Constelação', tema: 'Descanso', principal: true, desc: 'O grafo de perguntas com palavras hebraicas, uma síntese em bloco de dedução e a vista Linha com previsões.' },
           { id: 'deducao', nome: 'Mesa de dedução', tema: 'Melquisedeque', desc: 'Complete frases de síntese. Só blocos de três se confirmam.' },
           { id: 'lexico', nome: 'Léxico vivo', tema: 'Hesed, kavod, shalom', desc: 'Descubra o sentido de palavras hebraicas pelos contextos.' },
           { id: 'promessa', nome: 'Linha da promessa', tema: 'O descendente prometido', desc: 'Atravesse a linha do tempo prevendo cada passo.' },
@@ -59,22 +58,27 @@
 
         function renderProtos() {
           const d = Lab.diario();
-          document.getElementById('protos').replaceChildren(
-            ...PROTOS.map((p, i) => {
-              const sess = d.filter((e) => e.proto === p.id && e.tipo === 'sessao').length;
-              const temProg = Lab.store.get(`${p.id}:progresso`, null);
-              return h(
-                'div',
-                { class: 'card' },
-                h(
-                  'a',
-                  { class: 'proto', href: `${p.id}/` },
-                  h('span', { class: 'num' }, i + 1),
-                  h('div', {}, h('b', {}, p.nome), h('p', {}, p.desc), h('p', { class: 'meta' }, `Tema: ${p.tema} · ${sess} ${sess === 1 ? 'sessão' : 'sessões'}`)),
-                ),
-                temProg && h('div', { class: 'linha', style: 'justify-content:flex-end' }, h('button', { class: 'btn link', onclick: () => recomecar(p) }, 'Recomeçar')),
-              );
-            }),
+          const cartao = (p, num) => {
+            const sess = d.filter((e) => e.proto === p.id && e.tipo === 'sessao').length;
+            const temProg = Lab.store.get(`${p.id}:progresso`, null);
+            return h(
+              'div',
+              { class: 'card' },
+              h(
+                'a',
+                { class: 'proto', href: `${p.id}/` },
+                num && h('span', { class: 'num' }, num),
+                h('div', {}, h('b', {}, p.nome), h('p', {}, p.desc), h('p', { class: 'meta' }, `Tema: ${p.tema} · ${sess} ${sess === 1 ? 'sessão' : 'sessões'}`)),
+              ),
+              temProg && h('div', { class: 'linha', style: 'justify-content:flex-end' }, h('button', { class: 'btn link', onclick: () => recomecar(p) }, 'Recomeçar')),
+            );
+          };
+          Lab.mount(
+            document.getElementById('protos'),
+            PROTOS.filter((p) => p.principal).map((p) => cartao(p)),
+            h('h2', {}, 'Protótipos separados'),
+            h('p', { class: 'muted' }, 'As mecânicas originais, cada uma sozinha, para comparar.'),
+            PROTOS.filter((p) => !p.principal).map((p, i) => cartao(p, i + 1)),
           );
         }
 

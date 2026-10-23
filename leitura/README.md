@@ -1,19 +1,18 @@
 # Laboratório de leitura bíblica
 
 Protótipos pessoais para testar **como** um conteúdo bíblico é absorvido.
-São cinco mecânicas sobre a mesma base, e cada uma recebe um tema
-diferente para que um teste não estrague o seguinte.
 
-O foco não é o conteúdo, e sim a forma de absorção. Os pacotes em
-`conteudo/` existem para alimentar os protótipos e podem ser trocados.
+Depois da primeira rodada de testes, Cadernos saiu e as três mecânicas que
+funcionaram (dedução, léxico e linha do tempo) foram juntadas sobre o grafo
+de perguntas, na **Constelação**. As versões separadas continuam disponíveis
+para comparação.
 
-| # | Protótipo | Pacote | Tema | O que precisa provar |
-|---|---|---|---|---|
-| 1 | Constelações | `conteudo/1-constelacoes.json` | Descanso | O "?" puxa para dentro do texto? O grafo é legível no celular? |
-| 2 | Cadernos | `conteudo/2-cadernos.json` | O Cordeiro | A voz de um estudioso aumenta a vontade de seguir? Corrigir uma hipótese dá satisfação? |
-| 3 | Mesa de dedução | `conteudo/3-deducao.json` | Melquisedeque | Dá para ter o "eureka" sem parecer prova? |
-| 4 | Léxico vivo | `conteudo/4-lexico.json` | *Hesed*, *kavod*, *shalom* | Estudar palavras sustenta a curiosidade sozinho? |
-| 5 | Linha da promessa | `conteudo/5-promessa.json` | O descendente prometido | O panorama puxa para frente mesmo sendo linear? |
+| Protótipo | Pacote | Tema | O que precisa provar |
+|---|---|---|---|
+| **Constelação** (combinado) | `conteudo/descanso.json` | Descanso | Palavras, síntese em bloco e previsões fazem abrir mais passagens, ou só dão mais trabalho? |
+| Mesa de dedução | `conteudo/3-deducao.json` | Melquisedeque | Dá para ter o "eureka" sem parecer prova? |
+| Léxico vivo | `conteudo/4-lexico.json` | *Hesed*, *kavod*, *shalom* | Estudar palavras sustenta a curiosidade sozinho? |
+| Linha da promessa | `conteudo/5-promessa.json` | O descendente prometido | O panorama puxa para frente mesmo sendo linear? |
 
 > Os pacotes contêm as respostas. Se quiser jogar sem saber, não abra os
 > JSON. Deixe o protótipo mostrar.
@@ -34,11 +33,10 @@ leitura/
   index.html          início: protótipos, tradução, diário (copiar/baixar)
   shared/base.js      API da Bíblia, leitor de passagens, janelas, progresso, diário
   shared/base.css     estilos comuns, mobile primeiro, tema claro/escuro
-  constelacoes/       protótipo 1
-  cadernos/           protótipo 2
-  deducao/            protótipo 3
-  lexico/             protótipo 4
-  promessa/           protótipo 5
+  constelacao/        protótipo combinado
+  deducao/            mesa de dedução (separada)
+  lexico/             léxico vivo (separado)
+  promessa/           linha da promessa (separada)
   conteudo/           pacotes JSON
 ```
 
@@ -60,7 +58,7 @@ ficam em cache no aparelho.
 
 ## Base comum
 
-Os cinco protótipos devem compartilhar:
+Todos os protótipos compartilham:
 
 1. **O mesmo leitor de passagens**: texto limpo, sem elementos de jogo,
    com toque em um versículo para selecioná-lo e confirmação explícita.
@@ -86,8 +84,8 @@ Todo pacote tem:
 
 ```jsonc
 {
-  "prototipo": "constelacoes | cadernos | deducao | lexico | promessa",
-  "versao": 1,
+  "prototipo": "constelacao | deducao | lexico | promessa",
+  "versao": 1,                      // a Constelação usa 2
   "tema": "texto curto",
   "pergunta_central": "a grande pergunta que o pacote responde",
   "convite": {                      // autonomia: pergunta em vez de missão
@@ -115,51 +113,60 @@ Errar nunca tira progresso. Toda resposta errada mostra um retorno
 informativo (`retorno_erro`) ou genérico ("esse trecho fala de outra
 coisa, continue procurando").
 
-### 1. Constelações
+### Constelação (combinado)
+
+O pacote tem `epocas`, `nos` e `palavras`.
 
 ```jsonc
+"epocas": [{ "id": "criacao", "titulo": "Criação" }],   // em ordem: a vista Linha segue esta ordem
 "nos": [{
   "id": "...",
   "tipo": "inicio | pergunta | sintese",
-  "titulo": "rótulo curto do nó",
-  "pergunta": "o que aparece enquanto o nó é '?'",
-  "passagem": "<id de passagens>",
-  "evidencia": ["Gen.2.3"],
-  "dica": "Gen.2.2-Gen.2.3",
-  "revelacao": "resumo que o nó mostra depois de resolvido",
-  "pistas": [{ "para": "<id>", "tipo": "citacao | mesma_palavra | alusao | tema", "texto": "o que a pista diz" }],
-  "requer": ["<ids>"]             // só no nó de síntese
+  "titulo": "...",
+  "epoca": "<id de epocas>",
+  "silhueta": "o que a vista Linha mostra enquanto o nó está oculto",
+  "pergunta": "...",
+  "passagem": "<id>",
+  "evidencia": ["..."], "dica": "...",          // não usados no nó com "deducao"
+  "previsao": { "pergunta": "...", "opcoes": ["..."], "correta": 0, "retorno": "..." }, // opcional
+  "revelacao": "...",
+  "pistas": [{ "para": "<id>", "tipo": "citacao | mesma_palavra | alusao | tema", "texto": "..." }],
+  "requer": ["<ids>"],                          // só na síntese
+  "deducao": {                                  // só na síntese: um bloco de frases
+    "banco_termos": ["..."],
+    "frases": [{ "id": "f1", "modelo": "… {a} …", "lacunas": { "a": "termo" } }]
+  }
+}],
+"palavras": [{
+  "id": "shabat", "titulo": "Shabat", "original": "שַׁבָּת", "transliteracao": "shabat", "lingua": "hebraico",
+  "aparece_apos": 2,          // passagens resolvidas antes de a palavra surgir no mapa
+  "confirmar_apos": 3,        // tamanho do grupo de escolhas conferidas juntas
+  "pergunta_inicial": "...",
+  "letras": [{ "glifo": "ש", "nome": "Shin", "som": "sh", "valor": 300, "papel": "raiz | prefixo… | terminação…", "desenho": "dente" }],
+  "raiz": { "letras": "ש ב ת", "translit": "sh-b-t", "sentido": "cessar", "familia": [{ "palavra": "…", "translit": "…", "sentido": "…" }] },
+  "facetas": [{ "id": "...", "descricao": "...", "no": "<id do nó que revela esta faceta>" }],
+  "facetas_distratoras": [{ "id": "...", "descricao": "..." }],
+  "sintese": "..."
 }]
 ```
 
-Estados de um nó: **oculto** (ninguém apontou para ele), **?** (uma
-pista resolvida aponta para ele), **resolvido**. O nó `inicio` já começa
-como **?**.
+Regras:
 
-### 2. Cadernos
+- Um nó fica **oculto** até uma pista resolvida apontar para ele. No
+  grafo ele não aparece. Na vista Linha, aparece como silhueta na sua época.
+- Antes de ler um nó com `previsao`, o jogador pode prever a resposta (ou
+  pular). O acerto aparece depois, sem afetar o progresso.
+- Uma palavra surge quando `aparece_apos` passagens foram resolvidas e
+  uma das passagens dela também. Ao resolver uma passagem ligada a uma
+  palavra já visível, o jogador escolhe qual faceta aquela passagem revela.
+  As escolhas são conferidas em grupos de `confirmar_apos`.
+- As letras mostram nome, som, valor e papel na palavra. O `desenho` é a
+  origem do nome da letra e aparece marcado como curiosidade: ele não
+  define o sentido da palavra. O sentido vem da **raiz** e da família dela.
+- A síntese abre quando todos os `requer` estão resolvidos e se confirma
+  só quando todas as frases do bloco estão certas.
 
-```jsonc
-"estudioso": { "nome": "...", "apresentacao": "..." },
-"anotacoes": [{
-  "id": "...",
-  "inicial": true,                // opcional: visível desde o começo; as demais surgem via "libera"
-  "estado": "pergunta | hipotese | interrompida",
-  "texto": "a anotação como o estudioso a deixou (primeira pessoa)",
-  "passagem": "<id>",
-  "acao_esperada": "confirmar | corrigir | completar",
-  "evidencia": ["..."],
-  "dica": "...",
-  "revelacao": "o que o jogador entende ao resolver",
-  "nota_do_estudioso_depois": "opcional: uma anotação posterior dele, que só aparece depois",
-  "libera": ["<ids>"]
-}],
-"pergunta_final": { "texto": "...", "requer": ["<ids>"], "sintese": "..." }
-```
-
-O jogador escolhe a ação (confirmar, corrigir ou completar) e então marca
-a evidência. Acerta quando a ação e o versículo batem.
-
-### 3. Mesa de dedução
+### Mesa de dedução
 
 ```jsonc
 "cartas": [{ "id": "c1", "passagem": "<id>" }],
@@ -178,7 +185,7 @@ Uma frase nunca é validada sozinha. O protótipo só diz "este bloco está
 certo" quando **as três frases do bloco** estão corretas, no estilo
 *Return of the Obra Dinn*.
 
-### 4. Léxico vivo
+### Léxico vivo
 
 ```jsonc
 "palavras": [{
@@ -203,7 +210,7 @@ são corrigidas uma a uma. Elas são validadas em lote a cada
 `confirmar_apos` ocorrências, e só então as `nota`s aparecem. No fim, ele
 escreve a própria definição e a compara com a `sintese`.
 
-### 5. Linha da promessa
+### Linha da promessa
 
 ```jsonc
 "epocas": [{
@@ -222,7 +229,7 @@ escreve a própria definição e a compara com a `sintese`.
 }]
 ```
 
-## Diário pós-sessão (igual nos cinco)
+## Diário pós-sessão (igual em todos)
 
 Os protótipos fazem essas perguntas sozinhos: as três primeiras no botão
 "Encerrar", a quarta quando você abre num dia novo e a quinta 3 dias

@@ -1,254 +1,146 @@
 # Laboratório de leitura bíblica
 
-Protótipos pessoais para testar **como** um conteúdo bíblico é absorvido.
+Protótipo pessoal de um jogo de estudo bíblico inspirado no ship log de
+*Outer Wilds*: você avança porque entende, não porque ganha pontos.
 
-Depois da primeira rodada de testes, Cadernos saiu e as três mecânicas que
-funcionaram (dedução, léxico e linha do tempo) foram juntadas sobre o grafo
-de perguntas, na **Constelação**. As versões separadas continuam disponíveis
-para comparação.
+Ele saiu de uma rodada de testes com cinco protótipos. Cadernos foi
+descartado, e as mecânicas que funcionaram (grafo de perguntas, léxico,
+dedução) foram juntadas num jogo só.
 
-| Protótipo | Pacote | Tema | O que precisa provar |
-|---|---|---|---|
-| **Constelação** (combinado) | `conteudo/descanso.json` | Descanso | Palavras, síntese em bloco e previsões fazem abrir mais passagens, ou só dão mais trabalho? |
-| Mesa de dedução | `conteudo/3-deducao.json` | Melquisedeque | Dá para ter o "eureka" sem parecer prova? |
-| Léxico vivo | `conteudo/4-lexico.json` | *Hesed*, *kavod*, *shalom* | Estudar palavras sustenta a curiosidade sozinho? |
-| Linha da promessa | `conteudo/5-promessa.json` | O descendente prometido | O panorama puxa para frente mesmo sendo linear? |
+## Como o jogo funciona
 
-> Os pacotes contêm as respostas. Se quiser jogar sem saber, não abra os
-> JSON. Deixe o protótipo mostrar.
+Duas telas em lousa de tela cheia. Arraste para mover; aproxime com pinça,
+roda do mouse ou os botões + e −. O botão ⤢ enquadra tudo.
 
-## Como usar
+1. **Sistema:** a tela de seleção. Cada planeta é uma constelação
+   (um tema).
+   - Colorido: você já visitou.
+   - Cinza: você ouviu falar, mas ainda não foi.
+   - Só o contorno: ainda desconhecido.
 
-Abra `leitura/` no navegador do celular. No site publicado, o endereço é
-`<seu-site>/leitura/`. A página não aparece no hub de propósito, porque é
-de uso pessoal.
+   As luas são as palavras hebraicas daquele tema, preenchidas quando
+   descobertas. Toque num planeta e em "Ver entradas".
+2. **Constelação:** o grafo de perguntas.
+   - **Nó de passagem:** um "?" aparece quando uma pista aponta para ele.
+     Você lê e marca o versículo que responde. Alguns deixam prever a
+     resposta antes de ler.
+   - **Palavras que brilham:** durante a leitura, certas palavras do
+     texto brilham. Tocar numa delas revela a palavra hebraica por trás
+     (por exemplo, "repousou" → *shabat*), e o nó da palavra surge na
+     constelação. Numa passagem que mostra uma faceta da palavra, você
+     escolhe qual é e a resposta é conferida na hora.
+   - **Nó de palavra:** mostra as letras (nome, som, valor, papel na
+     palavra), a raiz e a família dela, todas as palavras do texto já
+     encontradas que traduzem essa palavra, e as facetas descobertas.
+     O desenho de origem de cada letra aparece como curiosidade: ele
+     explica o nome da letra, não o sentido da palavra.
+   - **Síntese:** abre quando as perguntas e as palavras exigidas foram
+     encontradas. Você arrasta as palavras aprendidas para as lacunas
+     das frases (ou toca na palavra e depois na lacuna). Não há
+     distratores: quando todas as lacunas estão preenchidas, as erradas
+     ficam marcadas em vermelho até serem trocadas.
 
-Os arquivos são estáticos e não precisam de build. Para rodar no
-computador, sirva a pasta raiz do site (`python3 -m http.server`) e abra
-`http://localhost:8000/leitura/`. Abrir o arquivo direto (`file://`) não
-funciona, porque o navegador bloqueia a leitura dos JSON.
+O menu (☰) tem a tradução, o diário, o encerramento da sessão e a opção
+de recomeçar a constelação.
+
+## Como rodar
+
+Os arquivos são estáticos e não precisam de build. Sirva a raiz do site
+(`python3 -m http.server`) e abra `http://localhost:8000/leitura/`.
+Abrir o arquivo direto (`file://`) não funciona, porque o navegador
+bloqueia a leitura dos JSON.
 
 ```
 leitura/
-  index.html          início: protótipos, tradução, diário (copiar/baixar)
-  shared/base.js      API da Bíblia, leitor de passagens, janelas, progresso, diário
+  index.html          página do jogo (estilos da lousa e das janelas)
+  app.js              telas Sistema e Constelação, palavras, síntese, menu
+  lousa.js            superfície SVG em tela cheia com arrastar e zoom
+  shared/base.js      API da Bíblia, leitor (com palavras que brilham), janelas, progresso, diário
   shared/base.css     estilos comuns, mobile primeiro, tema claro/escuro
-  constelacao/        protótipo combinado
-  deducao/            mesa de dedução (separada)
-  lexico/             léxico vivo (separado)
-  promessa/           linha da promessa (separada)
-  conteudo/           pacotes JSON
+  conteudo/sistema.json   planetas da tela de seleção
+  conteudo/descanso.json  a constelação Descanso
 ```
 
-O progresso de cada protótipo e o diário ficam no `localStorage` do
-aparelho. Use "Recomeçar" na página inicial para zerar um protótipo, e
-"Baixar diário" para guardar as respostas fora do navegador.
+O progresso de cada constelação e o diário ficam no `localStorage` do
+aparelho.
 
 ### Tradução (API da AO Lab)
 
 O texto vem da [Free Use Bible API](https://bible.helloao.org/), da AO
 Lab: `GET /api/available_translations.json` e
-`GET /api/{tradução}/{livro}/{capítulo}.json`. A base procura uma tradução
-em português chamada NVI (ou "Nova Versão Internacional"). **Se a API não
-tiver a NVI, o que é provável, porque a API só publica textos de uso livre
-e a NVI pertence à Biblica**, o laboratório pede para você escolher outra
-tradução em português. A escolha pode ser trocada a qualquer momento no
-topo de cada protótipo ou na página inicial. Os capítulos já baixados
-ficam em cache no aparelho.
+`GET /api/{tradução}/{livro}/{capítulo}.json`. O jogo procura uma
+tradução em português chamada NVI. Se a API não tiver a NVI, o que é
+provável, porque ela só publica textos de uso livre e a NVI pertence à
+Biblica, o jogo pede para você escolher outra tradução em português. Os
+capítulos já baixados ficam em cache.
 
-## Base comum
+Os pacotes não contêm texto bíblico, só referências OSIS (`Gen.2.3`), que
+o leitor resolve na tradução escolhida.
 
-Todos os protótipos compartilham:
+## Formato do conteúdo
 
-1. **O mesmo leitor de passagens**: texto limpo, sem elementos de jogo,
-   com toque em um versículo para selecioná-lo e confirmação explícita.
-2. **O mesmo formato de passagem** (abaixo).
-3. **O mesmo diário pós-sessão** (abaixo).
+### `sistema.json`
 
-Assim, o que muda entre eles é só a camada de jogo, e a comparação mede
-a mecânica, não a interface de leitura.
+```jsonc
+{ "corpos": [
+  { "id": "descanso", "titulo": "Descanso", "pacote": "descanso.json", "cor": "#d9a441", "raio": 62 },
+  { "id": "cordeiro", "titulo": "O Cordeiro", "pacote": null, "cor": "#c7685a", "raio": 48, "luas": 2 }  // sem pacote: desconhecido
+] }
+```
 
-### Texto bíblico
-
-Os pacotes **não contêm texto bíblico**, só referências. O leitor busca
-cada referência OSIS na API da AO Lab, na tradução escolhida (ver "Como
-usar").
-
-Atenção: os códigos OSIS seguem a numeração de versículos usual das
-Bíblias em português e inglês. Ela difere da numeração hebraica em alguns
-Salmos e em Isaías 9.
-
-## Formato comum
-
-Todo pacote tem:
+### Pacote de constelação
 
 ```jsonc
 {
-  "prototipo": "constelacao | deducao | lexico | promessa",
-  "versao": 1,                      // a Constelação usa 2
-  "tema": "texto curto",
-  "pergunta_central": "a grande pergunta que o pacote responde",
-  "convite": {                      // autonomia: pergunta em vez de missão
-    "pergunta": "texto",
-    "opcoes": [{ "texto": "...", "leva_a": "id opcional" }]
-  },
-  "passagens": {
-    "<id>": {
-      "ref": "Gn 2:2-3",            // exibição em português
-      "osis": "Gen.2.2-Gen.2.3",    // intervalo exibido no leitor
-      "contexto": "Gen.2.1-Gen.2.4", // opcional: trecho maior que contém a passagem, oferecido como "ler o contexto"
-      "ver_tambem": ["Gen.22.15-Gen.22.18"] // opcional: referências em outros lugares
+  "prototipo": "constelacao", "versao": 3,
+  "tema": "...", "pergunta_central": "...",
+  "convite": { "pergunta": "...", "opcoes": [{ "texto": "...", "leva_a": "<id de nó ou null>" }] },
+  "passagens": { "<id>": { "ref": "Gn 2:1-3", "osis": "Gen.2.1-Gen.2.3", "contexto": "opcional" } },
+  "nos": [{
+    "id": "...", "tipo": "inicio | pergunta | sintese", "titulo": "...",
+    "pergunta": "...", "passagem": "<id>",
+    "evidencia": ["Gen.2.3"],            // qualquer um conta como acerto
+    "dica": "Gen.2.2-Gen.2.3",           // mostrada depois de 2 erros
+    "retorno_erro": "opcional",
+    "previsao": { "pergunta": "...", "opcoes": ["..."], "correta": 0, "retorno": "..." },  // opcional
+    "revelacao": "...",
+    "pistas": [{ "para": "<id>", "tipo": "citacao | mesma_palavra | alusao | tema", "texto": "..." }],
+    "requer": ["<ids>"], "requer_palavras": ["<ids>"],   // só na síntese
+    "deducao": {                                        // só na síntese
+      "fichas": [{ "texto": "shavat", "palavra": "shabat" }],
+      "frases": [{ "id": "f1", "modelo": "… {a} …", "lacunas": { "a": "shavat" } }]
     }
-  }
-  // ...campos específicos da mecânica (ver abaixo)
+  }],
+  "palavras": [{
+    "id": "shabat", "titulo": "Shabat", "original": "שַׁבָּת", "transliteracao": "shabat", "lingua": "hebraico",
+    "pergunta_inicial": "...",
+    "letras": [{ "glifo": "ש", "nome": "Shin", "som": "sh", "valor": 300, "papel": "raiz", "desenho": "dente" }],
+    "raiz": { "letras": "ש ב ת", "translit": "sh-b-t", "sentido": "cessar", "familia": [{ "palavra": "…", "translit": "…", "sentido": "…" }] },
+    "ocorrencias": [{ "verso": "Gen.2.2", "formas": ["repousou", "descansou"], "nota": "opcional" }],
+    "facetas": [{ "id": "...", "descricao": "...", "no": "<nó cuja passagem revela esta faceta>" }],
+    "sintese": "..."
+  }]
 }
 ```
 
-**Evidência** é sempre uma lista de versículos OSIS individuais
-(`"Gen.2.3"`). Qualquer um deles conta como acerto. **Dica** é um
-intervalo OSIS menor que a passagem, mostrado depois de 2 erros, para
-afunilar a busca sem entregar a resposta.
+- `formas` são as palavras do texto que brilham naquele versículo:
+  palavras inteiras, ou radicais terminados em `*`. Liste as variações das
+  traduções mais comuns ("sábado", "repouso"…). Num mesmo versículo, duas
+  palavras hebraicas podem ter formas diferentes (em Êx 20:11, "repouso" é
+  *shabat* e "repousou" é *nuach*).
+- Uma faceta é perguntada quando o jogador toca numa forma que brilha
+  dentro da passagem do nó indicado em `no`.
+- As fichas da síntese são exatamente as respostas: cada uma vai numa
+  lacuna, sem sobras.
 
-Errar nunca tira progresso. Toda resposta errada mostra um retorno
-informativo (`retorno_erro`) ou genérico ("esse trecho fala de outra
-coisa, continue procurando").
+## Diário
 
-### Constelação (combinado)
+O jogo pergunta sozinho:
 
-O pacote tem `epocas`, `nos` e `palavras`.
+- **no fim da sessão** (menu → Encerrar): que perguntas surgiram sem o
+  jogo pedir, onde foi o seu tempo (lendo ou na interface) e onde travou;
+- **ao abrir num dia novo:** se você voltou por vontade própria;
+- **3 dias depois da primeira sessão:** o que você lembra, de memória,
+  antes de ver o conteúdo.
 
-```jsonc
-"epocas": [{ "id": "criacao", "titulo": "Criação" }],   // em ordem: a vista Linha segue esta ordem
-"nos": [{
-  "id": "...",
-  "tipo": "inicio | pergunta | sintese",
-  "titulo": "...",
-  "epoca": "<id de epocas>",
-  "silhueta": "o que a vista Linha mostra enquanto o nó está oculto",
-  "pergunta": "...",
-  "passagem": "<id>",
-  "evidencia": ["..."], "dica": "...",          // não usados no nó com "deducao"
-  "previsao": { "pergunta": "...", "opcoes": ["..."], "correta": 0, "retorno": "..." }, // opcional
-  "revelacao": "...",
-  "pistas": [{ "para": "<id>", "tipo": "citacao | mesma_palavra | alusao | tema", "texto": "..." }],
-  "requer": ["<ids>"],                          // só na síntese
-  "deducao": {                                  // só na síntese: um bloco de frases
-    "banco_termos": ["..."],
-    "frases": [{ "id": "f1", "modelo": "… {a} …", "lacunas": { "a": "termo" } }]
-  }
-}],
-"palavras": [{
-  "id": "shabat", "titulo": "Shabat", "original": "שַׁבָּת", "transliteracao": "shabat", "lingua": "hebraico",
-  "aparece_apos": 2,          // passagens resolvidas antes de a palavra surgir no mapa
-  "confirmar_apos": 3,        // tamanho do grupo de escolhas conferidas juntas
-  "pergunta_inicial": "...",
-  "letras": [{ "glifo": "ש", "nome": "Shin", "som": "sh", "valor": 300, "papel": "raiz | prefixo… | terminação…", "desenho": "dente" }],
-  "raiz": { "letras": "ש ב ת", "translit": "sh-b-t", "sentido": "cessar", "familia": [{ "palavra": "…", "translit": "…", "sentido": "…" }] },
-  "facetas": [{ "id": "...", "descricao": "...", "no": "<id do nó que revela esta faceta>" }],
-  "facetas_distratoras": [{ "id": "...", "descricao": "..." }],
-  "sintese": "..."
-}]
-```
-
-Regras:
-
-- Um nó fica **oculto** até uma pista resolvida apontar para ele. No
-  grafo ele não aparece. Na vista Linha, aparece como silhueta na sua época.
-- Antes de ler um nó com `previsao`, o jogador pode prever a resposta (ou
-  pular). O acerto aparece depois, sem afetar o progresso.
-- Uma palavra surge quando `aparece_apos` passagens foram resolvidas e
-  uma das passagens dela também. Ao resolver uma passagem ligada a uma
-  palavra já visível, o jogador escolhe qual faceta aquela passagem revela.
-  As escolhas são conferidas em grupos de `confirmar_apos`.
-- As letras mostram nome, som, valor e papel na palavra. O `desenho` é a
-  origem do nome da letra e aparece marcado como curiosidade: ele não
-  define o sentido da palavra. O sentido vem da **raiz** e da família dela.
-- A síntese abre quando todos os `requer` estão resolvidos e se confirma
-  só quando todas as frases do bloco estão certas.
-
-### Mesa de dedução
-
-```jsonc
-"cartas": [{ "id": "c1", "passagem": "<id>" }],
-"banco_termos": ["...", "..."],     // inclui distratores
-"frases": [{
-  "id": "f1",
-  "modelo": "Melquisedeque era ao mesmo tempo {a} e {b}.",
-  "lacunas": { "a": "rei", "b": "sacerdote" },
-  "aceita_ordem_livre": true,       // opcional: {a} e {b} podem trocar
-  "cartas_base": ["c1"]
-}],
-"blocos": [{ "frases": ["f1","f2","f3"], "revelacao": "mostrada quando o bloco fecha" }]
-```
-
-Uma frase nunca é validada sozinha. O protótipo só diz "este bloco está
-certo" quando **as três frases do bloco** estão corretas, no estilo
-*Return of the Obra Dinn*.
-
-### Léxico vivo
-
-```jsonc
-"palavras": [{
-  "id": "hesed",
-  "original": "חֶסֶד",
-  "transliteracao": "hesed",
-  "lingua": "hebraico",
-  "traducoes_comuns": ["misericórdia", "bondade", "..."],
-  "pergunta_inicial": "provocação antes da primeira ocorrência",
-  "facetas": [{ "id": "...", "descricao": "..." }],
-  "facetas_distratoras": [{ "id": "...", "descricao": "..." }],
-  "ocorrencias": [{ "passagem": "<id>", "faceta": "<id>", "nota": "revelada depois da escolha" }],
-  "confirmar_apos": 4,
-  "sintese": "definição de referência, comparada com a do jogador no fim"
-}]
-```
-
-Fluxo: o jogador lê uma ocorrência e anota livremente o que acha que a
-palavra significa ali. Depois escolhe qual faceta (entre as verdadeiras
-e as distratoras, embaralhadas) aquela ocorrência revela. As escolhas não
-são corrigidas uma a uma. Elas são validadas em lote a cada
-`confirmar_apos` ocorrências, e só então as `nota`s aparecem. No fim, ele
-escreve a própria definição e a compara com a `sintese`.
-
-### Linha da promessa
-
-```jsonc
-"epocas": [{
-  "id": "...",
-  "titulo": "...",
-  "passagem": "<id>",
-  "evidencia": ["..."],
-  "acrescimo": "o que a promessa ganha nesta época",
-  "silhueta_da_proxima": "teaser vago da época seguinte",
-  "previsao": {                    // feita antes de abrir a próxima época
-    "pergunta": "...",
-    "opcoes": ["...", "..."],
-    "correta": 0,
-    "retorno": "explicação mostrada depois"
-  }
-}]
-```
-
-## Diário pós-sessão (igual em todos)
-
-Os protótipos fazem essas perguntas sozinhos: as três primeiras no botão
-"Encerrar", a quarta quando você abre num dia novo e a quinta 3 dias
-depois da primeira sessão, antes de mostrar o conteúdo.
-
-Responda em menos de 1 minuto, logo depois de cada sessão:
-
-1. Que perguntas surgiram **sem o jogo pedir**? (escreva quais)
-2. Quanto do tempo foi lendo o texto e quanto mexendo na interface?
-   (estimativa)
-3. Onde travou ou perdeu a vontade?
-
-No dia seguinte:
-
-4. Abri sem lembrete? (sim/não)
-
-De 3 a 7 dias depois, sem consultar nada:
-
-5. Escreva de memória o que aprendeu com o pacote.
-
-**Critério final:** vence o protótipo com mais "abri sem lembrete" e a
-melhor lembrança tardia. Ideias dos outros podem ser incorporadas a ele.
+O diário pode ser copiado em JSON pelo menu.

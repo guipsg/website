@@ -1,6 +1,6 @@
 {
   "prototipo": "constelacao",
-  "versao": 2,
+  "versao": 3,
   "tema": "Descanso",
   "pergunta_central": "Que descanso Deus ofereceu desde o sétimo dia, e ele ainda está aberto?",
   "convite": {
@@ -80,36 +80,6 @@
       "osis": "Deut.12.8-Deut.12.11"
     }
   },
-  "epocas": [
-    {
-      "id": "criacao",
-      "titulo": "Criação"
-    },
-    {
-      "id": "sinai",
-      "titulo": "No Sinai"
-    },
-    {
-      "id": "moabe",
-      "titulo": "Às portas da terra"
-    },
-    {
-      "id": "davi",
-      "titulo": "Salmos"
-    },
-    {
-      "id": "profetas",
-      "titulo": "Profetas"
-    },
-    {
-      "id": "jesus",
-      "titulo": "Jesus"
-    },
-    {
-      "id": "igreja",
-      "titulo": "Igreja"
-    }
-  ],
   "nos": [
     {
       "id": "dia7",
@@ -129,9 +99,7 @@
           "tipo": "tema",
           "texto": "Esse dia separado volta a aparecer, agora como ordem para um povo."
         }
-      ],
-      "epoca": "criacao",
-      "silhueta": "O primeiro descanso."
+      ]
     },
     {
       "id": "mandamento",
@@ -156,8 +124,6 @@
           "texto": "Não são só pessoas e animais que descansam."
         }
       ],
-      "epoca": "sinai",
-      "silhueta": "Uma ordem escrita em pedra.",
       "previsao": {
         "pergunta": "Antes de ler: que razão você espera que o mandamento dê?",
         "opcoes": [
@@ -193,8 +159,6 @@
           "texto": "No mesmo discurso, Moisés fala de um descanso que ainda viria."
         }
       ],
-      "epoca": "moabe",
-      "silhueta": "A mesma ordem, repetida anos depois.",
       "previsao": {
         "pergunta": "Antes de ler: Moisés repete o mandamento. Que razão você espera agora?",
         "opcoes": [
@@ -210,8 +174,6 @@
       "id": "heranca",
       "tipo": "pergunta",
       "titulo": "Ainda não chegaram",
-      "epoca": "moabe",
-      "silhueta": "Um povo à beira de um rio, ainda sem chegar.",
       "pergunta": "Às portas da terra, o que Moisés diz que o povo ainda não alcançou?",
       "passagem": "dt12",
       "evidencia": [
@@ -257,8 +219,6 @@
           "texto": "Sete vezes sete anos depois, vem algo maior."
         }
       ],
-      "epoca": "sinai",
-      "silhueta": "Uma lei para o campo.",
       "previsao": {
         "pergunta": "Antes de ler: quem mais recebe um sábado?",
         "opcoes": [
@@ -288,8 +248,6 @@
           "texto": "Um profeta usa a linguagem do jubileu para anunciar um \"ano\" de favor do Senhor."
         }
       ],
-      "epoca": "sinai",
-      "silhueta": "Uma trombeta a cada cinquenta anos.",
       "previsao": {
         "pergunta": "Antes de ler: o que você acha que acontece no 50º ano?",
         "opcoes": [
@@ -320,8 +278,6 @@
           "texto": "Alguém lê este texto em voz alta, numa sinagoga, num sábado."
         }
       ],
-      "epoca": "profetas",
-      "silhueta": "Um profeta anuncia um ano.",
       "previsao": {
         "pergunta": "Antes de ler: como o profeta vai falar do jubileu?",
         "opcoes": [
@@ -351,8 +307,6 @@
           "texto": "Pouco depois, ele é acusado de desrespeitar o sábado."
         }
       ],
-      "epoca": "jesus",
-      "silhueta": "Um rolo aberto numa sinagoga.",
       "previsao": {
         "pergunta": "Antes de ler: ao terminar de ler Isaías, o que Jesus faz?",
         "opcoes": [
@@ -388,8 +342,6 @@
           "texto": "Em outro sábado, ele lê um texto profético sobre libertação."
         }
       ],
-      "epoca": "jesus",
-      "silhueta": "Uma discussão num campo de trigo.",
       "previsao": {
         "pergunta": "Antes de ler: para quem Jesus diz que o sábado foi feito?",
         "opcoes": [
@@ -420,8 +372,6 @@
           "texto": "Um salmo fala de um povo que não entrou no \"meu descanso\"."
         }
       ],
-      "epoca": "jesus",
-      "silhueta": "Um convite aos cansados.",
       "previsao": {
         "pergunta": "Antes de ler: o descanso que Jesus oferece é…",
         "opcoes": [
@@ -456,15 +406,13 @@
           "tipo": "tema",
           "texto": "Muito antes, Moisés já dizia que o povo ainda não tinha chegado ao descanso."
         }
-      ],
-      "epoca": "davi",
-      "silhueta": "Uma geração que ficou de fora."
+      ]
     },
     {
       "id": "resta",
       "tipo": "sintese",
       "titulo": "Resta um descanso",
-      "pergunta": "Se Josué já tinha levado o povo à terra, que descanso ainda resta? Complete as três frases.",
+      "pergunta": "Se Josué já tinha levado o povo à terra, que descanso ainda resta? Arraste as palavras que você aprendeu para os lugares certos.",
       "passagem": "hb4",
       "requer": [
         "dia7",
@@ -475,52 +423,71 @@
       ],
       "revelacao": "Hebreus junta tudo: o descanso do sétimo dia (v. 4), a terra que não foi o descanso final (v. 8) e o \"hoje\" do salmo (v. 7). Resta um \"repouso sabático\" para o povo de Deus, em que se entra pela fé, cessando das próprias obras como Deus cessou das suas. O sétimo dia era uma placa apontando para algo que ainda está aberto.",
       "pistas": [],
-      "epoca": "igreja",
-      "silhueta": "Uma carta que junta tudo.",
       "deducao": {
-        "banco_termos": [
-          "sétimo",
-          "primeiro",
-          "oitavo",
-          "Salmo 95",
-          "Salmo 23",
-          "Gênesis 3",
-          "\"hoje\"",
-          "\"amanhã\"",
-          "\"nunca\"",
-          "repouso sabático",
-          "templo novo",
-          "reino terreno",
-          "obras",
-          "guerras",
-          "ofertas"
+        "fichas": [
+          {
+            "texto": "shavat",
+            "palavra": "shabat"
+          },
+          {
+            "texto": "menuchá",
+            "palavra": "menucha"
+          },
+          {
+            "texto": "katápausis",
+            "palavra": "menucha"
+          },
+          {
+            "texto": "sabbatismós",
+            "palavra": "shabat"
+          },
+          {
+            "texto": "shabat",
+            "palavra": "shabat"
+          }
         ],
         "frases": [
           {
             "id": "f1",
-            "modelo": "Hebreus junta o descanso do {a} dia com o \"meu descanso\" do {b}.",
+            "modelo": "No sétimo dia, Deus {a}: parou porque a obra estava completa.",
             "lacunas": {
-              "a": "sétimo",
-              "b": "Salmo 95"
+              "a": "shavat"
             }
           },
           {
             "id": "f2",
-            "modelo": "Josué levou o povo à terra, mas aquele não era o descanso final, porque muito depois Davi ainda diz {a}.",
+            "modelo": "O Salmo 95 chama a terra prometida de \"minha {a}\", e uma geração inteira ficou de fora.",
             "lacunas": {
-              "a": "\"hoje\""
+              "a": "menuchá"
             }
           },
           {
             "id": "f3",
-            "modelo": "Por isso resta um {a} para o povo de Deus, e quem entra nele descansa das próprias {b}, como Deus das suas.",
+            "modelo": "Hebreus lê esse salmo em grego, em que a palavra é {a}, e conclui que Josué não deu o descanso final.",
             "lacunas": {
-              "a": "repouso sabático",
-              "b": "obras"
+              "a": "katápausis"
+            }
+          },
+          {
+            "id": "f4",
+            "modelo": "Por isso ainda resta um {a}, uma guarda de sábado, para o povo de Deus.",
+            "lacunas": {
+              "a": "sabbatismós"
+            }
+          },
+          {
+            "id": "f5",
+            "modelo": "Quem entra nele vive o próprio {a}: descansa das suas obras, como Deus das dele.",
+            "lacunas": {
+              "a": "shabat"
             }
           }
         ]
-      }
+      },
+      "requer_palavras": [
+        "shabat",
+        "menucha"
+      ]
     }
   ],
   "palavras": [
@@ -530,8 +497,6 @@
       "original": "שַׁבָּת",
       "transliteracao": "shabat",
       "lingua": "hebraico",
-      "aparece_apos": 2,
-      "confirmar_apos": 3,
       "pergunta_inicial": "A palavra por trás de \"sábado\". Ela quer dizer \"sétimo\"? Ou outra coisa?",
       "letras": [
         {
@@ -608,17 +573,137 @@
           "no": "senhor"
         }
       ],
-      "facetas_distratoras": [
+      "sintese": "Shabat vem de \"cessar\". É parar porque a obra está completa, num tempo separado para Deus. Esse tempo também liberta servos e estrangeiros, inclui a terra e foi feito como dom para o ser humano.",
+      "ocorrencias": [
         {
-          "id": "cansaco",
-          "descricao": "Repouso para recuperar o cansaço"
+          "verso": "Gen.2.2",
+          "formas": [
+            "repousou",
+            "descansou",
+            "cessou"
+          ],
+          "nota": "Aqui é o verbo shavat: cessar."
         },
         {
-          "id": "numero",
-          "descricao": "Simplesmente o número sete"
+          "verso": "Gen.2.3",
+          "formas": [
+            "repousou",
+            "descansou",
+            "cessou"
+          ],
+          "nota": "De novo shavat."
+        },
+        {
+          "verso": "Exod.20.8",
+          "formas": [
+            "sábado",
+            "repouso"
+          ]
+        },
+        {
+          "verso": "Exod.20.10",
+          "formas": [
+            "sábado",
+            "repouso"
+          ]
+        },
+        {
+          "verso": "Exod.20.11",
+          "formas": [
+            "sábado",
+            "repouso"
+          ],
+          "nota": "\"O dia do shabat\". O \"repousou\" deste mesmo versículo é outra palavra."
+        },
+        {
+          "verso": "Lev.25.2",
+          "formas": [
+            "sábado"
+          ],
+          "nota": "A terra \"guardará um shabat\"."
+        },
+        {
+          "verso": "Lev.25.4",
+          "formas": [
+            "sábado",
+            "descanso"
+          ],
+          "nota": "Shabat shabaton: \"descanso solene\" vem da mesma raiz."
+        },
+        {
+          "verso": "Lev.25.5",
+          "formas": [
+            "descanso"
+          ],
+          "nota": "Shabaton, da mesma raiz."
+        },
+        {
+          "verso": "Deut.5.12",
+          "formas": [
+            "sábado",
+            "repouso"
+          ]
+        },
+        {
+          "verso": "Deut.5.14",
+          "formas": [
+            "sábado",
+            "repouso"
+          ]
+        },
+        {
+          "verso": "Deut.5.15",
+          "formas": [
+            "sábado",
+            "repouso"
+          ]
+        },
+        {
+          "verso": "Luke.4.16",
+          "formas": [
+            "sábado"
+          ],
+          "nota": "Em grego: sábbaton, emprestado do hebraico."
+        },
+        {
+          "verso": "Mark.2.23",
+          "formas": [
+            "sábado",
+            "sábados"
+          ],
+          "nota": "Em grego: sábbaton, emprestado do hebraico."
+        },
+        {
+          "verso": "Mark.2.24",
+          "formas": [
+            "sábado",
+            "sábados"
+          ],
+          "nota": "Em grego: sábbaton."
+        },
+        {
+          "verso": "Mark.2.27",
+          "formas": [
+            "sábado"
+          ],
+          "nota": "Em grego: sábbaton."
+        },
+        {
+          "verso": "Mark.2.28",
+          "formas": [
+            "sábado"
+          ],
+          "nota": "Em grego: sábbaton."
+        },
+        {
+          "verso": "Heb.4.9",
+          "formas": [
+            "sabático",
+            "sábado"
+          ],
+          "nota": "Em grego: sabbatismós, \"guarda do sábado\", palavra derivada de shabat."
         }
-      ],
-      "sintese": "Shabat vem de \"cessar\". É parar porque a obra está completa, num tempo separado para Deus. Esse tempo também liberta servos e estrangeiros, inclui a terra e foi feito como dom para o ser humano."
+      ]
     },
     {
       "id": "menucha",
@@ -626,8 +711,6 @@
       "original": "מְנוּחָה",
       "transliteracao": "menuchá",
       "lingua": "hebraico",
-      "aparece_apos": 2,
-      "confirmar_apos": 3,
       "pergunta_inicial": "Outra palavra traduzida como \"descanso\". Se shabat é parar, o que é menuchá?",
       "letras": [
         {
@@ -690,6 +773,11 @@
             "palavra": "מְנוּחָתִי",
             "translit": "menuchatí",
             "sentido": "\"meu descanso\" (Sl 95:11)"
+          },
+          {
+            "palavra": "κατάπαυσις",
+            "translit": "katápausis",
+            "sentido": "descanso, em grego (Hb 4, citando o Sl 95)"
           }
         ]
       },
@@ -710,17 +798,102 @@
           "no": "salmo95"
         }
       ],
-      "facetas_distratoras": [
+      "sintese": "Menuchá é repouso assentado, quase um lugar. Deus repousa, e o povo imita. A terra seria a herança onde Deus daria descanso, e o Salmo 95 fala desse descanso como algo em que se entra ou do qual se fica de fora. É dele que Hebreus diz que ainda resta.",
+      "ocorrencias": [
         {
-          "id": "sono",
-          "descricao": "Sono, dormir"
+          "verso": "Exod.20.11",
+          "formas": [
+            "repousou",
+            "descansou"
+          ],
+          "nota": "Aqui o verbo é nuach, da raiz de menuchá."
         },
         {
-          "id": "morte",
-          "descricao": "Um eufemismo para a morte"
+          "verso": "Deut.5.14",
+          "formas": [
+            "descanse",
+            "descansem",
+            "descansar",
+            "repouse"
+          ],
+          "nota": "Nuach: o servo também deve repousar."
+        },
+        {
+          "verso": "Deut.12.9",
+          "formas": [
+            "repouso",
+            "descanso",
+            "resto"
+          ],
+          "nota": "Menuchá: o descanso como lugar aonde se chega."
+        },
+        {
+          "verso": "Deut.12.10",
+          "formas": [
+            "repouso",
+            "descanso"
+          ],
+          "nota": "Heniach: Deus \"dará descanso\"."
+        },
+        {
+          "verso": "Ps.95.11",
+          "formas": [
+            "descanso",
+            "repouso"
+          ],
+          "nota": "Menuchatí: \"o meu descanso\"."
+        },
+        {
+          "verso": "Heb.4.1",
+          "formas": [
+            "repouso",
+            "descanso"
+          ],
+          "nota": "Em grego: katápausis, a palavra que a tradução grega do Salmo 95 usa para menuchá."
+        },
+        {
+          "verso": "Heb.4.3",
+          "formas": [
+            "repouso",
+            "descanso"
+          ],
+          "nota": "Katápausis, citando o Salmo 95."
+        },
+        {
+          "verso": "Heb.4.5",
+          "formas": [
+            "repouso",
+            "descanso"
+          ],
+          "nota": "Katápausis, citando o Salmo 95."
+        },
+        {
+          "verso": "Heb.4.8",
+          "formas": [
+            "repouso",
+            "descanso"
+          ],
+          "nota": "Em grego, o verbo de katápausis."
+        },
+        {
+          "verso": "Heb.4.10",
+          "formas": [
+            "repouso",
+            "descanso",
+            "repousou",
+            "descansou"
+          ],
+          "nota": "Katápausis: entrar no descanso de Deus."
+        },
+        {
+          "verso": "Heb.4.11",
+          "formas": [
+            "repouso",
+            "descanso"
+          ],
+          "nota": "Katápausis."
         }
-      ],
-      "sintese": "Menuchá é repouso assentado, quase um lugar. Deus repousa, e o povo imita. A terra seria a herança onde Deus daria descanso, e o Salmo 95 fala desse descanso como algo em que se entra ou do qual se fica de fora. É dele que Hebreus diz que ainda resta."
+      ]
     }
   ]
 }

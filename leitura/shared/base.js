@@ -318,7 +318,10 @@
   // Abre a passagem em tela cheia. Com `select`, o jogador toca num versículo e
   // confirma; resolve com a chave OSIS do versículo ("Gen.2.3") ou null.
   // `foco` (intervalo OSIS) esmaece o que está fora, como dica.
-  function reader({ osis, contexto = null, title = null, prompt = '', select = false, foco = null, confirmLabel = null }) {
+  // `brilhos` faz palavras do texto brilharem: [{ id, verso, formas, achado }], em
+  // que `formas` são palavras inteiras ("sábado") ou radicais terminados em "*".
+  // Tocar numa delas chama `onBrilho(brilho, textoTocado)`.
+  function reader({ osis, contexto = null, title = null, prompt = '', select = false, foco = null, confirmLabel = null, brilhos = [], onBrilho = null }) {
     return new Promise((resolve) => {
       let selected = null;
       let showingContext = false;
@@ -389,7 +392,7 @@
                 { class: cls, 'data-key': x.key, onclick: select ? () => pick(x.key) : null },
                 h('sup', {}, x.v),
                 ' ',
-                x.text,
+                comBrilhos(x),
               ),
             );
           }
@@ -407,6 +410,48 @@
         }
       }
 
+      // Quebra o texto do versículo em trechos, envolvendo as formas que brilham.
+      function comBrilhos(x) {
+        const bs = brilhos.filter((b) => b.verso === x.key);
+        if (!bs.length) return x.text;
+        const achados = [];
+        for (const b of bs) {
+          const alt = b.formas.map((f) => (f.endsWith('*') ? escapeRe(f.slice(0, -1)) + '\\p{L}*' : escapeRe(f))).join('|');
+          const re = new RegExp(`(?<!\\p{L})(?:${alt})(?!\\p{L})`, 'giu');
+          for (const m of x.text.matchAll(re)) achados.push({ i: m.index, fim: m.index + m[0].length, b });
+        }
+        achados.sort((a, z) => a.i - z.i);
+        const partes = [];
+        let pos = 0;
+        for (const a of achados) {
+          if (a.i < pos) continue;
+          partes.push(x.text.slice(pos, a.i));
+          const txt = x.text.slice(a.i, a.fim);
+          partes.push(
+            h('span', {
+              class: `brilho ${a.b.achado ? 'achado' : ''}`,
+              'data-brilho': a.b.id,
+              role: 'button',
+              tabindex: 0,
+              onclick: (e) => tocarBrilho(e, a.b, txt),
+              onkeydown: (e) => (e.key === 'Enter' || e.key === ' ') && tocarBrilho(e, a.b, txt),
+            }, txt),
+          );
+          pos = a.fim;
+        }
+        partes.push(x.text.slice(pos));
+        return partes;
+      }
+
+      async function tocarBrilho(e, b, txt) {
+        e.preventDefault();
+        e.stopPropagation(); // não seleciona o versículo
+        buzz(15);
+        if (onBrilho) await onBrilho(b, txt);
+        b.achado = true;
+        list.querySelectorAll(`.brilho[data-brilho="${b.id}"]`).forEach((el) => el.classList.add('achado'));
+      }
+
       function pick(key) {
         selected = key;
         buzz(10);
@@ -418,6 +463,8 @@
       render();
     });
   }
+
+  const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
   // Confere um versículo contra `item.evidencia`. Conta erros por item em `erros`
   // (um objeto salvo no progresso) e, a partir do 2º erro, devolve a dica.
@@ -436,7 +483,7 @@
   // Conteúdo e progresso
   // ======================================================================
   async function loadPack(file) {
-    const res = await fetch(`../conteudo/${file}`, { cache: 'no-cache' });
+    const res = await fetch(`conteudo/${file}`, { cache: 'no-cache' });
     if (!res.ok) throw new Error(`Não encontrei o pacote ${file}`);
     return res.json();
   }
@@ -542,45 +589,10 @@
     return true;
   }
 
-  // Barra superior comum: voltar, título, tradução e encerrar sessão.
-  function header(proto, titulo) {
-    const trad = h('button', { class: 'btn link trad', onclick: async () => {
-      try {
-        const t = await chooseTranslation();
-        trad.textContent = t ? t.shortName || t.name : 'Tradução';
-      } catch {}
-    } }, bible.current()?.shortName || 'Tradução');
-    const bar = h(
-      'header',
-      { class: 'topo' },
-      h('a', { class: 'btn icone', href: '../', 'aria-label': 'Voltar ao laboratório' }, '←'),
-      h('h1', {}, titulo),
-      trad,
-      h('button', { class: 'btn', onclick: () => endSession(proto) }, 'Encerrar'),
-    );
-    document.body.prepend(bar);
-    return bar;
-  }
-
-  // Inicialização padrão de um protótipo.
-  async function boot({ proto, titulo, pack, initial }) {
-    header(proto, titulo);
-    const data = await loadPack(pack);
-    const prog = progress(proto, initial);
-    await startSession(proto, titulo);
-    try {
-      await bible.ensure();
-      document.querySelector('.topo .trad').textContent = bible.current()?.shortName || 'Tradução';
-    } catch {
-      toast('Não consegui falar com a API da Bíblia. O texto vai tentar carregar de novo ao abrir uma passagem.', 'erro');
-    }
-    return { data, prog };
-  }
-
   window.Lab = {
     store, bible, BOOKS, parseVerse, parseRange, inRange, fmtRef,
     h, mount, modal, escolha, toast, buzz, reader, checkEvidence, chooseTranslation,
-    loadPack, progress, startSession, endSession, header, boot, diario,
+    loadPack, progress, startSession, endSession, diario,
     shuffle(arr) {
       const a = arr.slice();
       for (let i = a.length - 1; i > 0; i--) {

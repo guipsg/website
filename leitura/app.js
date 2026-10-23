@@ -36,6 +36,9 @@
   }
 
   const progressoDe = (id) => Lab.store.get(`${id}:progresso`, null);
+  // Modo de teste: botões que completam nós, palavras e a síntese sem jogar.
+  const modoTeste = () => Lab.store.get('modo-teste', false);
+  const BOTAO_TESTE = '⚡ Completar (teste)';
 
   function ligarHud() {
     $('#voltar').onclick = () => mostrarSistema();
@@ -61,7 +64,13 @@
     });
   }
 
+  function marcarTeste() {
+    $('#menu').classList.toggle('teste', modoTeste());
+    $('#menu').setAttribute('aria-label', modoTeste() ? 'Menu (modo de teste ligado)' : 'Menu');
+  }
+
   function hud(titulo, subtitulo, comVoltar) {
+    marcarTeste();
     $('#titulo').textContent = titulo;
     $('#subtitulo').textContent = subtitulo;
     $('#voltar').hidden = !comVoltar;
@@ -329,10 +338,12 @@
       const faltamPal = (n.requer_palavras || []).filter((id) => !descoberta(palavras.get(id))).length;
       if (faltamNos || faltamPal) {
         const partes = [faltamNos && `${faltamNos} ${faltamNos === 1 ? 'pergunta' : 'perguntas'} do mapa`, faltamPal && `${faltamPal} ${faltamPal === 1 ? 'palavra brilhando no texto' : 'palavras brilhando no texto'}`].filter(Boolean);
-        await modal({
+        const r = await modal({
           title: n.titulo,
           body: h('div', {}, h('p', {}, n.pergunta), h('p', { class: 'aviso' }, `Esta pergunta junta várias partes do mapa. Antes, ainda falta encontrar ${partes.join(' e ')}.`)),
+          actions: [modoTeste() && { label: BOTAO_TESTE, value: 'teste' }, { label: 'Ok', value: true, primary: true }].filter(Boolean),
         });
+        if (r === 'teste') return completarTeste(n);
         return render();
       }
       if (n.deducao) return abrirSintese(n);
@@ -341,9 +352,10 @@
         const op = await Lab.escolha({
           title: n.titulo,
           intro: h('div', {}, h('p', {}, n.pergunta), h('p', { class: 'aviso' }, n.previsao.pergunta)),
-          opcoes: [...n.previsao.opcoes.map((texto, idx) => ({ texto, idx })), { texto: 'Prefiro só ler', idx: -1 }],
+          opcoes: [...n.previsao.opcoes.map((texto, idx) => ({ texto, idx })), { texto: 'Prefiro só ler', idx: -1 }, modoTeste() && { texto: BOTAO_TESTE, teste: true }].filter(Boolean),
         });
         if (!op) return;
+        if (op.teste) return completarTeste(n);
         S.previsoes[n.id] = op.idx;
         prog.save();
       } else {
@@ -351,13 +363,34 @@
           title: n.titulo,
           body: h('div', {}, h('p', {}, n.pergunta), h('p', { class: 'muted' }, `A resposta está em ${fmtRef(pas.osis)}.`)),
           actions: [
+            modoTeste() && { label: BOTAO_TESTE, value: 'teste' },
             { label: 'Depois', value: null },
             { label: 'Ler e responder', value: 'ler', primary: true },
-          ],
+          ].filter(Boolean),
         });
+        if (r === 'teste') return completarTeste(n);
         if (r !== 'ler') return;
       }
       responder(n);
+    }
+
+    // Modo de teste: marca o nó como entendido sem ler (a síntese conclui direto).
+    function completarTeste(n) {
+      if (!S.vistos.includes(n.id)) S.vistos.push(n.id);
+      if (n.deducao) return concluirSintese(n);
+      S.resolvidos.push(n.id);
+      prog.save();
+      destaque = new Set(n.pistas.map((p) => p.para).filter((id) => !isResolved(id)));
+      render();
+      mostrarNovos(n);
+      avisoEntendido(n);
+    }
+
+    // Modo de teste: encontra todos os usos da palavra e confirma todas as facetas.
+    function completarPalavraTeste(w) {
+      S.achadas[w.id] = w.ocorrencias.map((o) => ({ verso: o.verso, texto: o.formas[0].replace('*', '') }));
+      S.facetasOk[w.id] = w.facetas.map((f) => f.id);
+      prog.save();
     }
 
     async function responder(n) {
@@ -377,7 +410,14 @@
       buzz(40);
       destaque = new Set(n.pistas.map((p) => p.para).filter((id) => !isResolved(id)));
       render();
+      mostrarNovos(n);
       avisoEntendido(n);
+    }
+
+    // Se algum nó liberado nasceu fora da vista, reenquadra o mapa para mostrá-lo.
+    function mostrarNovos(n) {
+      const novos = n.pistas.map((p) => p.para).filter((id) => !isResolved(id));
+      if (novos.some((id) => !lousa.contem(pos[id].x, pos[id].y, 80))) enquadrar();
     }
 
     // Sem janela: os nós novos aparecem no mapa com "!", e o que se entendeu
@@ -454,7 +494,14 @@
         );
       };
       desenhar();
-      return modal({ title: w.titulo, body: corpoEl, actions: [{ label: 'Fechar', value: null, primary: true }] }).then(render);
+      return modal({
+        title: w.titulo,
+        body: corpoEl,
+        actions: [modoTeste() && !palavraCompleta(w) && { label: BOTAO_TESTE, value: 'teste' }, { label: 'Fechar', value: null, primary: true }].filter(Boolean),
+      }).then((r) => {
+        if (r === 'teste') completarPalavraTeste(w);
+        render();
+      });
     }
 
     function definicao(w, desenhar) {
@@ -484,7 +531,7 @@
       return modal({
         title: n.titulo,
         body: corpoEl,
-        actions: [{ label: 'Fechar', value: null }],
+        actions: [modoTeste() && { label: BOTAO_TESTE, value: 'teste' }, { label: 'Fechar', value: null }].filter(Boolean),
         mount: (close) => {
           const desenhar = () => {
             Lab.mount(
@@ -607,7 +654,7 @@
           marcarErros = vagas.every((v) => P[v.id] != null);
           desenhar();
         },
-      }).then(render);
+      }).then((r) => (r === 'teste' ? completarTeste(n) : render()));
     }
 
     async function concluirSintese(n) {
@@ -653,6 +700,7 @@
       { k: 'encerrar', texto: 'Encerrar a sessão (diário)' },
       tela?.recomecar && { k: 'recomecar', texto: 'Recomeçar este tema' },
       { k: 'sobre', texto: 'Sobre o texto bíblico' },
+      { k: 'teste', texto: `Modo de teste: ${modoTeste() ? 'ligado' : 'desligado'}` },
     ].filter(Boolean);
     const op = await Lab.escolha({ title: 'Menu', opcoes });
     if (!op) return;
@@ -672,6 +720,10 @@
         ],
       });
       if (r) tela.recomecar();
+    } else if (op.k === 'teste') {
+      Lab.store.set('modo-teste', !modoTeste());
+      toast(modoTeste() ? 'Modo de teste ligado: os nós ganham o botão "⚡ Completar (teste)".' : 'Modo de teste desligado.', 'ok');
+      marcarTeste();
     } else if (op.k === 'sobre') {
       const tr = Lab.bible.current();
       modal({ title: 'Texto bíblico', body: h('div', {}, h('p', {}, tr ? tr.name : 'Nenhuma tradução escolhida.'), tr?.licenseNotice && h('p', { class: 'muted' }, tr.licenseNotice)) });

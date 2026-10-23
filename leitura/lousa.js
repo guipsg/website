@@ -120,8 +120,11 @@
     });
 
     aplicar();
+    // O ponto (em coordenadas do mundo) está dentro da vista, com folga?
+    const contem = (x, y, folga = 0) => x > vb.x + folga && x < vb.x + vb.w - folga && y > vb.y + folga && y < vb.y + vb.h - folga;
+
     return {
-      svg, defs, mundo, el, enquadrar, zoom, mover,
+      svg, defs, mundo, el, enquadrar, zoom, mover, contem,
       limpar() {
         mundo.replaceChildren();
       },

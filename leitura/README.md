@@ -47,6 +47,19 @@ do mouse ou os botões + e −. O botão ⤢ enquadra tudo.
 O menu (☰) tem a tradução, o diário, o encerramento da sessão e a opção
 de recomeçar o tema.
 
+### Modo de teste
+
+Para testar o fluxo rápido, ligue **Menu → Modo de teste**. O botão do menu
+fica contornado em laranja enquanto o modo está ligado. Com ele, aparece
+"⚡ Completar (teste)":
+
+- num nó de passagem, marca como entendido sem ler (vale também para nós
+  ainda bloqueados por requisitos);
+- num nó de palavra, encontra todos os usos e confirma todas as facetas;
+- na síntese, conclui o tema.
+
+A escolha fica salva no aparelho até você desligar.
+
 ## Como rodar
 
 Os arquivos são estáticos e não precisam de build. Sirva a raiz do site

@@ -55,33 +55,54 @@ todas as perguntas foram entendidas.
 O menu (☰) tem a tradução, o diário, a importação de estudos, o
 encerramento da sessão e a opção de recomeçar o estudo.
 
-## Criar e compartilhar estudos
+## Criar e compartilhar estudos: o mural
 
-Em Temas, toque no "+" e em **Criar estudo**. O editor usa o mesmo
-quadro do jogo, com uma barra embaixo:
+Criar um estudo é estudar: você lê, anota, liga uma ideia à outra e volta
+a cada anotação para aprofundá-la. O estudo jogável é o que amadurece
+nesse mural.
 
-- **+ Nó** cria uma pergunta no meio da vista e abre o painel dela.
-- **Toque num nó** para editar: tipo (início, pergunta ou síntese),
-  título, pergunta, passagem (escrita em português, como `Gn 2:1-3` ou
-  `Mc 2:23–3:6`), contexto, evidência e dica (marcadas tocando nos
-  versículos, no próprio leitor), revelação, retorno ao errar, previsão
-  e, na síntese, quais perguntas ela exige. Cada campo tem uma frase de
-  orientação.
-- **Arraste um nó** para mudar o lugar dele. O quadro se move arrastando
-  o vazio.
-- **Ligar a outro nó** (no painel) cria uma pista: toque no nó de
-  destino, escolha o tipo de ligação e escreva o texto. Tocar no vazio
-  cancela.
-- **Estudo** tem título, descrição, pergunta central, cor, autor e
-  licença. O nome do autor fica guardado para os próximos estudos.
-- **Verificar** lista os erros (impedem testar e exportar) e os avisos
-  (conselhos de design, como perguntas que pedem só um fato). Tocar num
-  item abre o nó. O topo mostra a contagem o tempo todo, e os nós com
-  erro levam um "⚠".
-- **Testar** joga o rascunho do zero, com um progresso separado, e
-  "Voltar ao editor" no fim.
-- **Exportar** sobe a versão do estudo e oferece o arquivo
-  (`.estudo.json`) para baixar ou copiar.
+Em Temas, toque no "+" e em **Criar estudo**. O mural usa o mesmo quadro
+do jogo, com uma barra embaixo: **+ Nota, Ler, Falta, Testar, Estudo**.
+
+- **Anotar:** toque duas vezes no vazio (ou em "+ Nota") e escreva o que
+  percebeu, do seu jeito.
+- **Ler e fixar:** "Ler" abre qualquer trecho, inclusive um capítulo
+  inteiro (`Gn 2`). Toque nos versículos que chamaram atenção e em
+  "Fixar no mural": nasce uma nota com o texto e esses versículos.
+- **Aprofundar em camadas:** tocar numa nota a seleciona; tocar de novo
+  (ou "Aprofundar") abre as camadas dela, já na do próximo passo:
+  1. **Nota:** o que você percebeu (e, se quiser, um nome curto no mapa);
+  2. **Texto:** a passagem, escrita em português (`Gn 2:1-3`), com o
+     trecho logo abaixo para conferir;
+  3. **Pergunta:** que pergunta isso desperta;
+  4. **Resposta:** os versículos que respondem, marcados no leitor
+     (e uma dica opcional);
+  5. **Revelação:** o que se entende ao achar a resposta.
+
+  Em "Mais" ficam o papel no jogo, a síntese, o retorno ao errar e a
+  previsão. As marquinhas sobre a nota mostram as camadas feitas. Com
+  texto, pergunta, resposta e revelação, a nota **amadurece**: fica sólida
+  e passa a entrar no jogo. As outras continuam no mural como anotação
+  sua e não atrapalham nada.
+- **Ligar:** com uma nota selecionada, puxe a bolinha ao lado dela até
+  outra nota, como um fio. A ligação nasce fina e pontilhada; toque nela
+  para dizer **por que** as notas se ligam (vira a pista do jogo) e o
+  tipo. Com motivo, ela fica sólida e mais grossa. Dá para inverter o
+  sentido ou desfazer.
+- **Pulso:** ao tocar numa nota, um sinal corre pelas ligações até as
+  vizinhas e as vizinhas delas, como entre neurônios. Notas com muitas
+  ligações ganham um halo mais forte.
+- **Arrastar** uma nota muda o lugar dela; arrastar o vazio move o mural.
+- **Falta** mostra o que impede jogar, o próximo passo de cada nota em
+  andamento (tocar leva direto à camada) e conselhos de design.
+- **Testar** joga só as notas maduras, do zero, com "Voltar ao editor"
+  no fim. Uma nota madura sem ligação madura chegando é um começo do
+  jogo; em "Mais" dá para marcar outras como começo.
+- **Estudo** tem título, descrição, pergunta central, cor, autor,
+  licença e **Exportar**, que sobe a versão e oferece o arquivo
+  (`.estudo.json`) para baixar ou copiar. O arquivo leva o mural inteiro:
+  quem joga vê as notas maduras, e quem duplica vê também as anotações em
+  andamento do autor.
 
 Tudo é salvo no aparelho a cada mudança. Quem recebe o arquivo abre pelo
 menu → **Importar estudo**, escolhendo o arquivo ou colando o texto. A
@@ -91,9 +112,8 @@ no aparelho, a versão nova substitui a antiga e o progresso continua.
 
 O conteúdo importado é sempre exibido como texto, nunca como HTML.
 
-Nesta fase o editor ainda não cria palavras hebraicas nem a síntese de
-arrastar. Um estudo duplicado mantém as dele, e elas podem ser movidas no
-mapa.
+O mural ainda não cria palavras hebraicas nem a síntese de arrastar. Um
+estudo duplicado mantém as dele, e elas podem ser movidas.
 
 ### Modo de teste
 
@@ -119,7 +139,7 @@ bloqueia a leitura dos JSON.
 leitura/
   index.html          página do jogo (estilos da lousa, das janelas e do editor)
   app.js              telas Temas e mapa de perguntas, palavras, síntese, menu, importação
-  editor.js           editor de estudos
+  editor.js           mural de estudo (criação)
   estudos.js          formato dos estudos, armazenamento, referências em português, validação
   desenho.js          desenho de nós e pistas, posicionamento
   lousa.js            superfície SVG em tela cheia com arrastar e zoom
@@ -156,14 +176,16 @@ o leitor resolve na tradução escolhida.
 }
 ```
 
-### Estudo (formato 4)
+### Estudo (formato 5)
 
-O mesmo arquivo serve para os estudos do jogo, os criados no editor e os
-trocados entre pessoas.
+O mesmo arquivo serve para os estudos do jogo, os criados no mural e os
+trocados entre pessoas. O formato 5 permite notas ainda em andamento: o
+jogo usa só as maduras (com passagem, pergunta, resposta dentro da
+passagem e revelação). O formato 4 continua sendo lido.
 
 ```jsonc
 {
-  "formato": "estudo-biblico", "versao_formato": 4,
+  "formato": "estudo-biblico", "versao_formato": 5,
   "id": "descanso",                       // estável: o progresso fica guardado por ele
   "versao": 1,                            // sobe a cada exportação
   "criado_em": "…", "atualizado_em": "…",
@@ -174,14 +196,15 @@ trocados entre pessoas.
   "convite": { "pergunta": "...", "opcoes": [{ "texto": "...", "leva_a": "<id de nó ou null>" }] },  // opcional: sem ele, o jogo monta um com os nós de início
   "passagens": { "<id>": { "ref": "Gn 2:1-3", "osis": "Gen.2.1-Gen.2.3", "contexto": "opcional" } },
   "nos": [{
-    "id": "...", "tipo": "inicio | pergunta | sintese", "titulo": "...",
+    "id": "...", "tipo": "inicio | pergunta | sintese", "titulo": "nome no mapa (opcional)",
+    "nota": "o que quem criou percebeu (não aparece no jogo)",
     "pergunta": "...", "passagem": "<id>",
     "evidencia": ["Gen.2.3"],            // qualquer um conta como acerto
     "dica": "Gen.2.2-Gen.2.3",           // mostrada depois de 2 erros
     "retorno_erro": "opcional",
     "previsao": { "pergunta": "...", "opcoes": ["..."], "correta": 0, "retorno": "..." },  // opcional
     "revelacao": "...",
-    "pistas": [{ "para": "<id>", "tipo": "citacao | mesma_palavra | alusao | tema", "texto": "..." }],
+    "pistas": [{ "para": "<id>", "tipo": "citacao | mesma_palavra | alusao | tema", "texto": "o motivo da ligação" }],
     "pos": { "x": 0, "y": 0 },           // opcional: lugar no mapa (o editor sempre grava)
     "requer": ["<ids>"], "requer_palavras": ["<ids>"],   // opcional: a pergunta só abre depois destes
     "deducao": {                                        // opcional, só na síntese de arrastar
@@ -203,6 +226,8 @@ trocados entre pessoas.
 ```
 
 - Os arquivos não trazem texto bíblico, só referências OSIS.
+- `tipo` "pergunta" quer dizer automático: a nota começa o jogo se nenhuma
+  ligação madura chega nela. "inicio" força o começo.
 - Um nó do tipo síntese sem `deducao` funciona como uma pergunta comum.
 - `formas` são as palavras do texto que brilham naquele versículo:
   palavras inteiras, ou radicais terminados em `*`. Liste as variações das

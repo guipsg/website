@@ -271,11 +271,37 @@
       .barra-editor .btn.tem-erro { border: 2px solid var(--warn); color: var(--warn); }
       body.editando .hud-zoom { bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
       body.editando .hud-info { bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
-      .no.tipo-inicio circle { fill: var(--no-feito-fundo); stroke: var(--no-feito); }
-      .no.tipo-inicio .icone { fill: var(--no-feito); font-size: 24px; }
-      .no.tipo-sintese .icone { font-size: 30px; }
-      .no.origem circle { stroke-dasharray: 8 6; animation: pulso 1.4s ease-in-out infinite; }
+      body.editando .toast { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
+      /* mural: notas em andamento e maduras, ligações como fios */
+      .no.edicao circle.disco { fill: var(--no-fundo); stroke: var(--no-aberto); }
+      .no.edicao.crua circle.disco { fill: var(--quadro); stroke: var(--no-borda); stroke-dasharray: 7 5; }
+      .no.edicao.crua .icone { fill: var(--tinta-suave); font-size: 24px; }
+      .no.edicao circle.halo { fill: var(--no-aberto); stroke: none; opacity: 0.13; }
+      .no.edicao circle.anel-sel { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 8 6; }
+      .no.edicao circle.marca { fill: var(--quadro); stroke: var(--tinta-suave); stroke-width: 1.5; }
+      .no.edicao circle.marca.feita { fill: var(--no-aberto); stroke: var(--no-aberto); }
+      .no.edicao circle.puxador { fill: var(--accent); stroke: var(--quadro); stroke-width: 4; cursor: crosshair; }
+      .no.edicao.aceso circle.disco { stroke: var(--accent); stroke-width: 7; }
+      .no.edicao.aceso circle.halo { opacity: 0.35; }
+      .no.edicao.alvo-fio circle.disco { stroke: var(--accent); stroke-width: 7; }
+      .no.origem circle.disco { stroke-dasharray: 8 6; animation: pulso 1.4s ease-in-out infinite; }
       .no .selo.erro { fill: var(--warn); }
+      .impulso { fill: var(--accent); pointer-events: none; }
+      .impulso.nivel-2 { opacity: 0.55; }
+      .aresta.com-motivo { stroke-width: 3.5; }
+      .aresta.sem-motivo { stroke-width: 2; stroke-dasharray: 2 7; stroke-linecap: round; }
+      .aresta.crua { opacity: 0.55; }
+      .toque-ligacao { fill: none; stroke: transparent; stroke-width: 26; pointer-events: stroke; cursor: pointer; }
+      .fio { fill: none; stroke: var(--accent); stroke-width: 3; stroke-dasharray: 6 6; pointer-events: none; }
+      .camadas-estado { font-size: 14px; color: var(--muted); margin: 0 0 10px; }
+      .camadas-estado.ok { color: var(--ok); }
+      .camada { border-top: 1px solid var(--line); padding: 10px 0; }
+      .camada > summary { font-weight: 600; cursor: pointer; padding: 4px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .camada[open] > summary { margin-bottom: 8px; }
+      .trecho { font: 15px/1.5 var(--serif); background: var(--surface-2); border-radius: 10px; padding: 4px 10px; max-height: 180px; overflow: auto; margin: 0 0 12px; }
+      .trecho:empty { display: none; }
+      .trecho p { margin: 6px 0; }
+      .ligacao-item { font-size: 15px; padding: 10px 12px; margin: 6px 0; }
       .form .campo { display: block; margin: 0 0 16px; }
       .form .campo > .rotulo, .form summary { font-weight: 600; }
       .form summary { cursor: pointer; }
@@ -294,6 +320,7 @@
       .btn.perigo { color: var(--warn); border-color: var(--warn); }
       .opcao.verif { font-size: 15px; padding: 10px 12px; margin: 6px 0; }
       .opcao.verif.erro { border-color: var(--warn); }
+      .opcao.verif.aviso { color: var(--muted); }
       textarea.json { font: 12px ui-monospace, monospace; }
     </style>
   </head>
@@ -311,12 +338,12 @@
       <button class="hud-btn" data-zoom="enquadrar" aria-label="Enquadrar tudo">⤢</button>
     </div>
     <div class="hud-info" id="info" hidden></div>
-    <nav class="barra-editor" id="barra-editor" aria-label="Editor" hidden>
-      <button class="btn" data-acao="novo">+ Nó</button>
-      <button class="btn" data-acao="estudo">Estudo</button>
-      <button class="btn" data-acao="verificar" id="verificar">Verificar</button>
+    <nav class="barra-editor" id="barra-editor" aria-label="Mural" hidden>
+      <button class="btn" data-acao="nota">+ Nota</button>
+      <button class="btn" data-acao="ler">Ler</button>
+      <button class="btn" data-acao="falta" id="falta">Falta</button>
       <button class="btn" data-acao="testar">Testar</button>
-      <button class="btn" data-acao="exportar">Exportar</button>
+      <button class="btn" data-acao="estudo">Estudo</button>
     </nav>
     <script src="shared/base.js"></script>
     <script src="lousa.js"></script>

@@ -179,7 +179,9 @@
     const d = c.estudo;
     const p = progressoDe(d.id) || INICIAL;
     const palavras = d.palavras.filter((w) => (p.achadas?.[w.id] || []).length).length;
-    const erros = Estudos.validar(d).erros.length;
+    const { erros: problemas } = Estudos.validar(d);
+    const erros = problemas.length;
+    const jogo = Estudos.paraJogo(d); // só as notas maduras entram no jogo
     const autor = d.autor?.nome?.trim();
     const editar = () => Editor.abrir(d, ctx);
     const duplicar = () => {
@@ -193,10 +195,10 @@
       h('h2', {}, d.titulo),
       (autor || c.origem !== 'embutido') && h('p', { class: 'autor' }, [autor ? `por ${autor}` : 'sem autor', d.licenca, c.origem === 'importado' && 'importado'].filter(Boolean).join(' · ')),
       erros
-        ? h('p', { class: 'aviso' }, `Rascunho: ${erros} ${erros === 1 ? 'erro' : 'erros'} a corrigir no editor antes de jogar.`)
-        : h('p', {}, p.visitado ? `${p.resolvidos.length} de ${d.nos.length} entendidos${d.palavras.length ? ` · ${palavras} de ${d.palavras.length} palavras` : ''}` : 'Você ainda não começou este estudo.'),
+        ? h('p', { class: 'aviso' }, erros === 1 ? `Rascunho: ${problemas[0].msg}` : `Rascunho: ${erros} problemas a resolver no mural antes de jogar.`)
+        : h('p', {}, p.visitado ? `${p.resolvidos.length} de ${jogo.nos.length} entendidos${d.palavras.length ? ` · ${palavras} de ${d.palavras.length} palavras` : ''}` : 'Você ainda não começou este estudo.'),
       h('div', { class: 'linha' },
-        !erros && h('button', { class: 'btn primary', onclick: () => abrirEstudo(d) }, p.visitado ? 'Continuar' : 'Abrir'),
+        !erros && h('button', { class: 'btn primary', onclick: () => abrirEstudo(jogo) }, p.visitado ? 'Continuar' : 'Abrir'),
         c.origem === 'meu' ? h('button', { class: 'btn', onclick: editar }, 'Editar') : h('button', { class: 'btn', onclick: duplicar }, 'Duplicar para editar'),
         c.origem !== 'embutido' && h('button', { class: 'btn', onclick: () => excluir(c) }, 'Excluir')),
     );
@@ -845,6 +847,7 @@
     if (erros.length) {
       return modal({ title: 'Não dá para importar', body: h('div', {}, h('p', {}, 'O estudo tem erros que impedem jogar:'), h('ul', {}, erros.slice(0, 8).map((x) => h('li', {}, x.msg)))) });
     }
+    const jogaveis = Estudos.paraJogo(e).nos.length;
     const existente = Estudos.locais()[e.id];
     const embutido = embutidos.some((x) => x.id === e.id);
     const r = await modal({
@@ -852,7 +855,7 @@
       body: h('div', {},
         h('p', { class: 'autor' }, [e.autor?.nome?.trim() ? `por ${e.autor.nome.trim()}` : 'sem autor', e.licenca, `versão ${e.versao || 1}`].filter(Boolean).join(' · ')),
         e.descricao && h('p', {}, e.descricao),
-        h('p', {}, `${e.nos.length} ${e.nos.length === 1 ? 'pergunta' : 'perguntas'}${e.palavras.length ? ` · ${e.palavras.length} palavras` : ''}${avisos.length ? ` · ${avisos.length} ${avisos.length === 1 ? 'aviso' : 'avisos'} de design` : ''}`),
+        h('p', {}, `${jogaveis} ${jogaveis === 1 ? 'pergunta' : 'perguntas'}${e.nos.length > jogaveis ? ` · ${e.nos.length - jogaveis} ${e.nos.length - jogaveis === 1 ? 'nota' : 'notas'} em andamento do autor` : ''}${e.palavras.length ? ` · ${e.palavras.length} palavras` : ''}${avisos.length ? ` · ${avisos.length} ${avisos.length === 1 ? 'aviso' : 'avisos'} de design` : ''}`),
         existente && h('p', { class: 'aviso' }, `Você já tem este estudo (versão ${existente.estudo.versao || 1}). Instalar substitui o que está no aparelho; seu progresso continua.`),
         embutido && h('p', { class: 'aviso' }, 'Este estudo já vem com o jogo. Ele será instalado como uma cópia separada.')),
       actions: [

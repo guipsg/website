@@ -4,7 +4,7 @@
 (() => {
   'use strict';
   const FORMATO = 'estudo-biblico';
-  const VERSAO_FORMATO = 4;
+  const VERSAO_FORMATO = 5; // 5: notas em andamento (ainda não maduras) e o campo `nota`
   const LICENCAS = ['CC BY 4.0', 'CC BY-SA 4.0', 'CC0 (domínio público)', 'Todos os direitos reservados'];
   const TIPOS_NO = ['inicio', 'pergunta', 'sintese'];
   const TIPOS_PISTA = ['tema', 'citacao', 'alusao', 'mesma_palavra'];
@@ -94,10 +94,16 @@
   LIVROS.jo = 'John'; // "Jo" é João; Jó se escreve com acento e vira "jo" também, então "Jó" pede o nome inteiro
   LIVROS['jó'] = 'Job';
 
-  // "Gn 2:1-3", "Mc 2:23–3:6", "1Sm 4:18", "Salmos 95.11" → { osis } ou { erro }
-  function refParaOsis(texto) {
+  // "Gn 2:1-3", "Mc 2:23–3:6", "1Sm 4:18", "Salmos 95.11" → { osis } ou { erro }.
+  // Com `capitulo`, aceita também um capítulo inteiro ("Gn 2").
+  function refParaOsis(texto, { capitulo = false } = {}) {
     const t = (texto || '').trim();
     if (!t) return { erro: 'Escreva uma referência, por exemplo Gn 2:1-3.' };
+    const cap = capitulo && /^([1-3]?\s*[\p{L}]+)\.?\s*(\d+)$/u.exec(t);
+    if (cap) {
+      const r = refParaOsis(`${cap[1]} ${cap[2]}:1-176`);
+      return r.erro ? r : { ...r, capitulo: true };
+    }
     const m = /^([1-3]?\s*[\p{L}]+)\.?\s*(\d+)\s*[:.]\s*(\d+)(?:\s*[-–]\s*(?:(\d+)\s*[:.]\s*)?(\d+))?$/u.exec(t);
     if (!m) return { erro: 'Use o formato livro capítulo:versículo, como Gn 2:1-3.' };
     const chave = /^jó$/i.test(m[1].trim()) ? 'jó' : norm(m[1]);
@@ -144,7 +150,7 @@
       if (!n || !str(n.id, 60) || !n.id || ids.has(n.id)) return 'Há nós sem identificador ou repetidos.';
       ids.add(n.id);
       if (!TIPOS_NO.includes(n.tipo)) return `O nó "${n.id}" tem um tipo desconhecido.`;
-      for (const k of ['titulo', 'pergunta', 'revelacao', 'retorno_erro', 'dica', 'passagem']) if (n[k] != null && !str(n[k], 4000)) return `O nó "${n.id}" tem um texto inválido.`;
+      for (const k of ['titulo', 'nota', 'pergunta', 'revelacao', 'retorno_erro', 'dica', 'passagem']) if (n[k] != null && !str(n[k], 4000)) return `O nó "${n.id}" tem um texto inválido.`;
       if (!Array.isArray(n.pistas || [])) return `As pistas do nó "${n.id}" são inválidas.`;
       for (const p of n.pistas || []) if (!p || !str(p.para, 60) || !TIPOS_PISTA.includes(p.tipo) || !str(p.texto || '', 1000)) return `Uma pista do nó "${n.id}" é inválida.`;
       if (n.evidencia && (!Array.isArray(n.evidencia) || n.evidencia.some((v) => !osisOk(v)))) return `A evidência do nó "${n.id}" é inválida.`;
@@ -185,77 +191,140 @@
     for (const k of Object.keys(e.passagens)) if (!usadas.has(k)) delete e.passagens[k];
   }
 
-  // Verificador do editor: erros impedem testar e exportar; avisos são
-  // conselhos de design (vindos da skill de curiosidade).
+  // ---------------------------------------------------------------- notas
+  // Uma nota do mural se aprofunda em camadas. Com texto, pergunta, resposta e
+  // revelação ela amadurece e entra no jogo; antes disso é anotação de quem cria.
+  const CAMADAS = ['nota', 'texto', 'pergunta', 'resposta', 'revelacao'];
+  const dentro = (v, osis) => {
+    try {
+      return Lab.inRange(v, osis);
+    } catch {
+      return false;
+    }
+  };
+  const pontas = (faixa) => {
+    const r = Lab.parseRange(faixa);
+    return [`${r.book}.${r.from.ch}.${r.from.v}`, `${r.book}.${r.to.ch}.${r.to.v}`];
+  };
+  function camadas(n, e) {
+    const pas = e.passagens[n.passagem];
+    return {
+      nota: !!n.nota?.trim(),
+      texto: !!pas,
+      pergunta: !!n.pergunta?.trim(),
+      resposta: !!pas && (n.deducao ? true : !!n.evidencia?.length && n.evidencia.every((v) => dentro(v, pas.osis))),
+      revelacao: !!n.revelacao?.trim(),
+    };
+  }
+  function previsaoOk(p) {
+    if (!p) return true;
+    const opcoes = (p.opcoes || []).filter((o) => o?.trim());
+    return !!p.pergunta?.trim() && opcoes.length >= 2 && p.correta >= 0 && p.correta < (p.opcoes || []).length && !!p.opcoes[p.correta]?.trim();
+  }
+  // O próximo passo de uma nota: { camada, msg }, ou null se ela já amadureceu.
+  function proximoPasso(n, e) {
+    const c = camadas(n, e);
+    const pas = e.passagens[n.passagem];
+    if (!c.texto) return { camada: 'texto', msg: 'Em que texto isso aparece?' };
+    if (!c.pergunta) return { camada: 'pergunta', msg: 'Que pergunta isso desperta?' };
+    if (!c.resposta) return { camada: 'resposta', msg: n.evidencia?.length ? 'A resposta ficou fora do texto: marque os versículos de novo.' : 'Quais versículos respondem à pergunta?' };
+    if (!c.revelacao) return { camada: 'revelacao', msg: 'O que se entende ao achar a resposta?' };
+    if (n.dica && !pontas(n.dica).every((v) => dentro(v, pas.osis))) return { camada: 'resposta', msg: 'A dica ficou fora do texto: marque de novo ou remova.' };
+    if (!previsaoOk(n.previsao)) return { camada: 'extras', msg: 'Complete a previsão (pergunta, duas opções e a certa) ou apague-a.' };
+    return null;
+  }
+  const madura = (n, e) => !proximoPasso(n, e);
+  // Nome da nota no mapa: o título, o começo da nota ou da pergunta, ou o texto
+  // fixado (com o estudo em `e`).
+  function rotuloNo(n, e = null) {
+    if (n.titulo?.trim()) return n.titulo.trim();
+    const t = (n.nota || n.pergunta || '').trim().replace(/\s+/g, ' ');
+    const pas = e?.passagens[n.passagem];
+    if (!t) return pas ? Lab.fmtRef(pas.osis) : 'nota vazia';
+    const palavras = t.split(' ');
+    return palavras.length > 4 ? `${palavras.slice(0, 4).join(' ')}…` : t;
+  }
+
+  // O estudo que o jogo vê: só as notas maduras e as ligações entre elas. Uma
+  // nota madura sem ligação madura chegando é um início.
+  function paraJogo(e) {
+    const j = structuredClone(e);
+    const maduras = new Set(j.nos.filter((n) => madura(n, e)).map((n) => n.id));
+    j.nos = j.nos.filter((n) => maduras.has(n.id));
+    for (const n of j.nos) n.pistas = n.pistas.filter((p) => maduras.has(p.para));
+    for (const n of j.nos) {
+      n.titulo = rotuloNo(n, e);
+      const chega = j.nos.some((m) => m.pistas.some((p) => p.para === n.id));
+      if (n.tipo !== 'sintese' && !chega) n.tipo = 'inicio';
+    }
+    return j;
+  }
+
+  // ---------------------------------------------------------------- validar
+  // Erros impedem testar e exportar; faltas são os próximos passos das notas
+  // ainda em andamento (não impedem nada); avisos são conselhos de design
+  // (vindos da skill de curiosidade).
   function validar(e) {
     const erros = [];
     const avisos = [];
+    const faltas = [];
     const err = (msg, no) => erros.push({ msg, no });
     const av = (msg, no) => avisos.push({ msg, no });
+    const ids = new Set(e.nos.map((n) => n.id));
+    const maduras = new Set(e.nos.filter((n) => madura(n, e)).map((n) => n.id));
+    const nome = (n) => rotuloNo(n, e);
     if (!e.titulo?.trim()) err('O estudo não tem título.');
+    if (!maduras.size) err(e.nos.length ? 'Nenhuma nota amadureceu ainda: o jogo não teria nenhuma pergunta.' : 'O mural está vazio.');
     if (!e.pergunta_central?.trim()) av('O estudo não tem pergunta central.');
     if (!e.autor?.nome?.trim()) av('Escreva seu nome no estudo antes de compartilhar.');
-    if (!e.nos.length) err('O estudo não tem nenhum nó.');
-    const ids = new Set(e.nos.map((n) => n.id));
-    if (e.nos.length && !e.nos.some((n) => n.tipo === 'inicio')) err('Nenhum nó é de início: o leitor não teria por onde começar.');
 
+    const saidas = (n) => (n.pistas || []).filter((p) => maduras.has(p.para)).length;
+    const finais = e.nos.filter((n) => maduras.has(n.id) && n.tipo !== 'sintese' && !saidas(n)).length;
     for (const n of e.nos) {
-      const nome = n.titulo?.trim() || 'Nó sem título';
-      if (!n.titulo?.trim()) err('O nó não tem título.', n.id);
-      if (!n.pergunta?.trim()) err(`"${nome}" não tem pergunta.`, n.id);
-      const pas = e.passagens[n.passagem];
-      if (!pas) {
-        if (!n.deducao) err(`"${nome}" não tem passagem.`, n.id);
-      } else if (!n.deducao) {
-        if (!n.evidencia?.length) err(`"${nome}" não tem versículo de evidência.`, n.id);
-        for (const v of n.evidencia || []) if (!Lab.inRange(v, pas.osis)) err(`A evidência ${Lab.fmtRef(v)} de "${nome}" está fora da passagem.`, n.id);
-        if (n.dica) {
-          const r = Lab.parseRange(n.dica);
-          const ini = `${r.book}.${r.from.ch}.${r.from.v}`;
-          const fim = `${r.book}.${r.to.ch}.${r.to.v}`;
-          if (!Lab.inRange(ini, pas.osis) || !Lab.inRange(fim, pas.osis)) err(`A dica de "${nome}" está fora da passagem.`, n.id);
-        }
-      }
-      for (const p of n.pistas || []) if (!ids.has(p.para)) err(`Uma pista de "${nome}" aponta para um nó que não existe mais.`, n.id);
-      for (const r of n.requer || []) if (!ids.has(r)) err(`"${nome}" exige um nó que não existe mais.`, n.id);
-      if (n.previsao) {
-        const p = n.previsao;
-        const opcoes = (p.opcoes || []).filter((o) => o?.trim());
-        if (!p.pergunta?.trim() || opcoes.length < 2 || !(p.correta >= 0 && p.correta < (p.opcoes || []).length) || !p.opcoes[p.correta]?.trim())
-          err(`A previsão de "${nome}" está incompleta (pergunta, duas opções e a correta).`, n.id);
+      const passo = proximoPasso(n, e);
+      if (passo) faltas.push({ msg: passo.msg, no: n.id, camada: passo.camada });
+      for (const p of n.pistas || []) if (!ids.has(p.para)) err(`Uma ligação de "${nome(n)}" aponta para uma nota que não existe mais.`, n.id);
+      for (const r of n.requer || []) {
+        if (!ids.has(r)) err(`"${nome(n)}" exige uma nota que não existe mais.`, n.id);
+        else if (maduras.has(n.id) && !maduras.has(r)) err(`"${nome(n)}" exige "${nome(e.nos.find((x) => x.id === r))}", que ainda não amadureceu.`, n.id);
       }
       if (n.deducao) {
         const fichas = n.deducao.fichas.map((f) => f.texto).sort();
         const lacunas = n.deducao.frases.flatMap((f) => Object.values(f.lacunas)).sort();
-        if (JSON.stringify(fichas) !== JSON.stringify(lacunas)) err(`As palavras da síntese "${nome}" não batem com as lacunas.`, n.id);
+        if (JSON.stringify(fichas) !== JSON.stringify(lacunas)) err(`As palavras da síntese "${nome(n)}" não batem com as lacunas.`, n.id);
       }
-      // Avisos de design
-      if (n.tipo !== 'sintese' && !(n.pistas || []).length && e.nos.length > 1) av(`"${nome}" não abre nenhuma pista: o mapa para aqui.`, n.id);
-      if (/^\s*(o que|quem|qual|quais|quando|onde)\b/i.test(n.pergunta || '')) av(`A pergunta de "${nome}" pede um fato. Perguntas de "por quê" ou "como" despertam mais curiosidade.`, n.id);
-      const rev = (n.revelacao || '').trim();
-      if (!rev) av(`"${nome}" não tem revelação. O que a pessoa entende ao achar a resposta?`, n.id);
-      else if (rev.length < 60) av(`A revelação de "${nome}" está curta. O que a pessoa entende ao achar a resposta?`, n.id);
+      for (const p of n.pistas || []) {
+        const alvo = e.nos.find((x) => x.id === p.para);
+        if (alvo && !p.texto?.trim()) av(`A ligação "${nome(n)}" → "${nome(alvo)}" não diz por quê. Toque nela para escrever a pista.`, n.id);
+      }
+      if (!maduras.has(n.id)) continue;
+      // Avisos de design, só para o que entra no jogo
+      // Um fim é natural; vários fins deixam o mapa sem para onde convergir.
+      if (n.tipo !== 'sintese' && !saidas(n) && finais > 1) av(`"${nome(n)}" não leva a nenhuma outra nota madura: o mapa tem ${finais} pontas soltas.`, n.id);
+      if (/^\s*(o que|quem|qual|quais|quando|onde)\b/i.test(n.pergunta || '')) av(`A pergunta de "${nome(n)}" pede um fato. Perguntas de "por quê" ou "como" despertam mais curiosidade.`, n.id);
+      if (n.revelacao.trim().length < 60) av(`A revelação de "${nome(n)}" está curta. O que a pessoa entende ao achar a resposta?`, n.id);
       if (n.tipo === 'sintese') {
-        const caminhos = e.nos.filter((m) => (m.pistas || []).some((p) => p.para === n.id)).length + (n.requer || []).length;
-        if (caminhos < 2) av(`A síntese "${nome}" tem um único caminho até ela.`, n.id);
+        const caminhos = e.nos.filter((m) => maduras.has(m.id) && (m.pistas || []).some((p) => p.para === n.id)).length + (n.requer || []).length;
+        if (caminhos < 2) av(`A síntese "${nome(n)}" tem um único caminho até ela.`, n.id);
       }
     }
 
-    // Alcance: a partir dos inícios, seguindo as pistas.
-    const alcancados = new Set(e.nos.filter((n) => n.tipo === 'inicio').map((n) => n.id));
+    // Alcance no jogo: dos inícios, seguindo as ligações entre notas maduras.
+    const jogo = paraJogo(e);
+    const alcancados = new Set(jogo.nos.filter((n) => n.tipo === 'inicio').map((n) => n.id));
     const fila = [...alcancados];
     while (fila.length) {
       const id = fila.shift();
-      const n = e.nos.find((x) => x.id === id);
-      for (const p of n?.pistas || []) if (ids.has(p.para) && !alcancados.has(p.para)) (alcancados.add(p.para), fila.push(p.para));
+      const n = jogo.nos.find((x) => x.id === id);
+      for (const p of n?.pistas || []) if (!alcancados.has(p.para)) (alcancados.add(p.para), fila.push(p.para));
     }
-    for (const n of e.nos) if (!alcancados.has(n.id) && e.nos.some((x) => x.tipo === 'inicio')) err(`Nenhuma pista leva até "${n.titulo || 'nó sem título'}".`, n.id);
+    for (const n of jogo.nos) if (!alcancados.has(n.id)) err(`Nenhum caminho do jogo leva até "${nome(n)}". Ligue uma nota madura a ela.`, n.id);
 
     for (const w of e.palavras || []) {
-      for (const f of w.facetas || []) if (!ids.has(f.no)) err(`Uma faceta de ${w.transliteracao} aponta para um nó que não existe.`);
+      for (const f of w.facetas || []) if (!maduras.has(f.no)) err(`Uma faceta de ${w.transliteracao} aponta para uma nota que não existe ou não amadureceu.`);
     }
-    return { erros, avisos };
+    return { erros, avisos, faltas };
   }
 
-  window.Estudos = { FORMATO, VERSAO_FORMATO, LICENCAS, locais, salvar, remover, novo, novoId, duplicar, convite, refParaOsis, estruturaInvalida, validar, agora, corSegura, preparar, limparPassagens };
+  window.Estudos = { FORMATO, VERSAO_FORMATO, LICENCAS, CAMADAS, locais, salvar, remover, novo, novoId, duplicar, convite, refParaOsis, estruturaInvalida, validar, agora, corSegura, preparar, limparPassagens, camadas, proximoPasso, madura, rotuloNo, paraJogo };
 })();

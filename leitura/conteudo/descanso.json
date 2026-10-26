@@ -1,7 +1,19 @@
 {
-  "prototipo": "constelacao",
-  "versao": 3,
-  "tema": "Descanso",
+  "formato": "estudo-biblico",
+  "versao_formato": 4,
+  "id": "descanso",
+  "versao": 1,
+  "criado_em": "2026-10-01T00:00:00.000Z",
+  "atualizado_em": "2026-10-26T00:00:00.000Z",
+  "autor": {
+    "nome": "Laboratório de leitura"
+  },
+  "licenca": "CC BY 4.0",
+  "idioma": "pt-BR",
+  "traducao_referencia": "porbr2018",
+  "titulo": "Descanso",
+  "descricao": "Do sétimo dia da criação ao descanso que Hebreus diz que ainda resta.",
+  "cor": "#d9a441",
   "pergunta_central": "Que descanso Deus ofereceu desde o sétimo dia, e ele ainda está aberto?",
   "convite": {
     "pergunta": "Três perguntas já estão abertas no mapa. Por qual você quer começar?",

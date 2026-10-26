@@ -1,34 +1,18 @@
 {
-  "corpos": [
-    {
-      "id": "descanso",
-      "titulo": "Descanso",
-      "pacote": "descanso.json",
-      "cor": "#d9a441",
-      "raio": 62
-    },
+  "estudos": [
+    "descanso.json"
+  ],
+  "desconhecidos": [
     {
       "id": "cordeiro",
-      "titulo": "O Cordeiro",
-      "pacote": null,
-      "cor": "#c7685a",
-      "raio": 48,
       "luas": 2
     },
     {
       "id": "melquisedeque",
-      "titulo": "Melquisedeque",
-      "pacote": null,
-      "cor": "#8f7ad1",
-      "raio": 34,
       "luas": 1
     },
     {
       "id": "promessa",
-      "titulo": "A promessa",
-      "pacote": null,
-      "cor": "#5aa38e",
-      "raio": 54,
       "luas": 3
     }
   ]

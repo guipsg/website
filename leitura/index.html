@@ -250,6 +250,51 @@
       .ficha.sel { background: var(--sel); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent); }
       .ficha.fantasma { position: fixed; z-index: 90; pointer-events: none; transform: translate(-50%, -50%) scale(1.08); box-shadow: var(--shadow); }
       .entrada-diario { border-top: 1px solid var(--line); padding: 8px 0; font-size: 14px; }
+      .autor { font-size: 14px; }
+      .hud-info .autor { margin: 0 0 4px; }
+
+      /* ---------- editor de estudos ---------- */
+      .medalha.novo { fill: none; stroke: var(--tinta-suave); stroke-dasharray: 9 7; }
+      .medalha-letra.novo { fill: var(--tinta-suave); font: 400 44px var(--sans); }
+      .barra-editor {
+        position: fixed;
+        left: max(18px, calc(env(safe-area-inset-left, 0px) + 10px));
+        right: max(18px, calc(env(safe-area-inset-right, 0px) + 10px));
+        bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 5px;
+        max-width: 520px;
+        margin: 0 auto;
+      }
+      .barra-editor .btn { padding: 8px 2px; min-height: 44px; font-size: 13px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); white-space: nowrap; }
+      .barra-editor .btn.tem-erro { border: 2px solid var(--warn); color: var(--warn); }
+      body.editando .hud-zoom { bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
+      body.editando .hud-info { bottom: calc(74px + env(safe-area-inset-bottom, 0px)); }
+      .no.tipo-inicio circle { fill: var(--no-feito-fundo); stroke: var(--no-feito); }
+      .no.tipo-inicio .icone { fill: var(--no-feito); font-size: 24px; }
+      .no.tipo-sintese .icone { font-size: 30px; }
+      .no.origem circle { stroke-dasharray: 8 6; animation: pulso 1.4s ease-in-out infinite; }
+      .no .selo.erro { fill: var(--warn); }
+      .form .campo { display: block; margin: 0 0 16px; }
+      .form .campo > .rotulo, .form summary { font-weight: 600; }
+      .form summary { cursor: pointer; }
+      .guia { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+      .form select, .form input[type='file'] { width: 100%; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; margin-top: 6px; }
+      .form input[type='color'] { width: 64px; height: 40px; margin-top: 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+      .form label { display: block; margin: 10px 0; }
+      .form label.check { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+      .form .valor { margin: 6px 0; }
+      .form .btn { margin-top: 6px; }
+      .status { display: block; font-size: 13px; margin-top: 4px; }
+      .status.ok { color: var(--ok); }
+      .status.erro { color: var(--warn); }
+      .pista-item { border-top: 1px solid var(--line); padding: 8px 0; }
+      .pista-item .linha { justify-content: space-between; }
+      .btn.perigo { color: var(--warn); border-color: var(--warn); }
+      .opcao.verif { font-size: 15px; padding: 10px 12px; margin: 6px 0; }
+      .opcao.verif.erro { border-color: var(--warn); }
+      textarea.json { font: 12px ui-monospace, monospace; }
     </style>
   </head>
   <body class="app">
@@ -266,8 +311,18 @@
       <button class="hud-btn" data-zoom="enquadrar" aria-label="Enquadrar tudo">⤢</button>
     </div>
     <div class="hud-info" id="info" hidden></div>
+    <nav class="barra-editor" id="barra-editor" aria-label="Editor" hidden>
+      <button class="btn" data-acao="novo">+ Nó</button>
+      <button class="btn" data-acao="estudo">Estudo</button>
+      <button class="btn" data-acao="verificar" id="verificar">Verificar</button>
+      <button class="btn" data-acao="testar">Testar</button>
+      <button class="btn" data-acao="exportar">Exportar</button>
+    </nav>
     <script src="shared/base.js"></script>
     <script src="lousa.js"></script>
+    <script src="desenho.js"></script>
+    <script src="estudos.js"></script>
+    <script src="editor.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

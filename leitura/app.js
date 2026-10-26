@@ -6,16 +6,28 @@
 (() => {
   'use strict';
   const { h, modal, toast, buzz, reader, checkEvidence, fmtRef } = Lab;
+  const { TIPOS, raio, txt, selo, linha2, noSvg, rotulo } = Desenho;
   const el = Lousa.el;
   const lousa = Lousa.criar(document.getElementById('lousa'));
   const $ = (s) => document.querySelector(s);
-  const TIPOS = { tema: 'tema', citacao: 'citação', alusao: 'alusão', mesma_palavra: 'mesma palavra' };
-    const INICIAL = { visitado: false, resolvidos: [], vistos: [], erros: {}, foco: {}, previsoes: {}, achadas: {}, palavrasVistas: [], facetasOk: {}, definicoes: {}, sintese: {}, convite: false };
+  const INICIAL = { visitado: false, resolvidos: [], vistos: [], erros: {}, foco: {}, previsoes: {}, achadas: {}, palavrasVistas: [], facetasOk: {}, definicoes: {}, sintese: {}, convite: false, completo: false };
 
   let sistema = null;
-  const pacotes = {}; // id do corpo -> dados do pacote
-  let tela = null; // { tipo: 'sistema' } ou o mapa de um tema
+  const embutidos = []; // estudos que vêm com o jogo
+  let tela = null; // { tipo: 'sistema' | 'estudo' | 'editor', enquadrar, voltar? }
   let selecionado = null;
+  let lista = []; // itens da tela de temas
+
+  // O editor desenha na mesma lousa e usa o mesmo topo.
+  const ctx = {
+    lousa, hud, $,
+    abrirEstudo: (estudo, opcoes) => abrirEstudo(estudo, opcoes),
+    temas: (id) => {
+      selecionado = id;
+      mostrarSistema();
+    },
+    usarTela: (t) => (tela = t),
+  };
 
   iniciar().catch((e) => {
     console.error(e);
@@ -24,7 +36,7 @@
 
   async function iniciar() {
     sistema = await Lab.loadPack('sistema.json');
-    for (const c of sistema.corpos) if (c.pacote) pacotes[c.id] = await Lab.loadPack(c.pacote);
+    for (const f of sistema.estudos) embutidos.push(Estudos.preparar(await Lab.loadPack(f)));
     ligarHud();
     mostrarSistema();
     await Lab.startSession('constelacao', 'o laboratório');
@@ -41,14 +53,14 @@
   const BOTAO_TESTE = '⚡ Completar (teste)';
 
   function ligarHud() {
-    $('#voltar').onclick = () => mostrarSistema();
+    $('#voltar').onclick = () => (tela?.voltar ? tela.voltar() : mostrarSistema());
     $('#menu').onclick = abrirMenu;
     // Girou o celular: o sistema troca entre fila e pilha.
     let giro = 0;
     addEventListener('resize', () => {
       clearTimeout(giro);
       giro = setTimeout(() => {
-        if (tela?.tipo === 'sistema') {
+        if (tela?.tipo === 'sistema' && !document.querySelector('.backdrop')) {
           desenharSistema();
           tela.enquadrar();
         }
@@ -71,6 +83,9 @@
 
   function hud(titulo, subtitulo, comVoltar) {
     marcarTeste();
+    // Cada tela liga o que é seu: o editor mostra a barra dele depois daqui.
+    document.body.classList.remove('editando');
+    $('#barra-editor').hidden = true;
     $('#titulo').textContent = titulo;
     $('#subtitulo').textContent = subtitulo;
     $('#voltar').hidden = !comVoltar;
@@ -83,9 +98,25 @@
   const emPe = () => innerHeight > innerWidth * 1.1;
   const posCorpo = (i) => (emPe() ? { x: 0, y: i * 300 } : { x: i * 290, y: 0 });
 
+  // Itens da tela: os estudos do jogo, os do aparelho (criados ou importados),
+  // o "+" para criar um estudo e os temas ainda desconhecidos.
+  function itens() {
+    const locais = Object.values(Estudos.locais()).map(({ origem, estudo }) => ({ id: estudo.id, origem, estudo: Estudos.preparar(estudo) }));
+    return [
+      ...embutidos.map((estudo) => ({ id: estudo.id, origem: 'embutido', estudo })),
+      ...locais,
+      { id: '+novo', origem: 'novo' },
+      ...sistema.desconhecidos.map((d) => ({ id: `?${d.id}`, origem: 'desconhecido', luas: d.luas })),
+    ];
+  }
+
   function mostrarSistema() {
-    const n = sistema.corpos.length;
-    const caixa = () => (emPe() ? { x: -150, y: -190, w: 300, h: 300 * (n - 1) + 410 } : { x: -150, y: -110, w: 290 * (n - 1) + 300, h: 330 });
+    lista = itens();
+    const caixa = () => {
+      const n = lista.length;
+      // Folga embaixo para o cartão de informações não cobrir o último tema.
+      return emPe() ? { x: -150, y: -190, w: 300, h: 300 * (n - 1) + 410 + 380 } : { x: -150, y: -110, w: 290 * (n - 1) + 300, h: 330 + 200 };
+    };
     tela = { tipo: 'sistema', enquadrar: () => lousa.enquadrar(caixa(), 60) };
     hud('Temas', 'Escolha um tema · arraste e aproxime', false);
     desenharSistema();
@@ -96,28 +127,30 @@
   function desenharSistema() {
     lousa.limpar();
     const M = lousa.mundo;
-    garantirDefs();
-    sistema.corpos.forEach((c, i) => {
+    Desenho.garantirDefs(lousa);
+    lista.forEach((c, i) => {
       const { x, y } = posCorpo(i);
-      const prog = progressoDe(c.id);
-      const estado = !c.pacote ? 'desconhecido' : prog && prog.visitado ? 'visitado' : 'ouvido';
-      const g = el('g', { class: `corpo ${selecionado === c.id ? 'selecionado' : ''}`, transform: `translate(${x},${y})`, tabindex: 0, role: 'button', 'aria-label': estado === 'desconhecido' ? 'Tema desconhecido' : c.titulo });
+      const e = c.estudo;
+      const prog = e && progressoDe(e.id);
+      const estado = c.origem === 'novo' ? 'novo' : !e ? 'desconhecido' : prog && prog.visitado ? 'visitado' : 'ouvido';
+      const nome = estado === 'novo' ? 'Novo estudo' : e?.titulo;
+      const g = el('g', { class: `corpo ${selecionado === c.id ? 'selecionado' : ''}`, transform: `translate(${x},${y})`, tabindex: 0, role: 'button', 'aria-label': nome || 'Tema desconhecido' });
       const R = 62;
       g.append(el('circle', { class: 'anel', r: R + 14 }));
-      // Visitado: a cor do tema. Conhecido: só o contorno. Desconhecido: tracejado.
-      g.append(el('circle', { class: `medalha ${estado}`, r: R, ...(estado === 'visitado' ? { fill: c.cor } : {}) }));
+      // Visitado: a cor do tema. Conhecido: só o contorno. Desconhecido e novo: tracejado.
+      g.append(el('circle', { class: `medalha ${estado}`, r: R, ...(estado === 'visitado' ? { fill: Estudos.corSegura(e.cor) } : {}) }));
       const letra = el('text', { class: `medalha-letra ${estado}` });
-      letra.textContent = estado === 'desconhecido' ? '?' : c.titulo.replace(/^(O|A) /, '')[0];
+      letra.textContent = estado === 'desconhecido' ? '?' : estado === 'novo' ? '+' : (e.titulo.replace(/^(O|A|Os|As) /, '')[0] || '?').toUpperCase();
       g.append(letra);
       // Um ponto por palavra do tema, preenchido quando descoberta.
-      const pal = pacotes[c.id]?.palavras || Array.from({ length: c.luas || 1 }, (_, k) => ({ id: `${c.id}-${k}` }));
+      const pal = e ? e.palavras : Array.from({ length: c.luas || 0 }, (_, k) => ({ id: `${c.id}-${k}` }));
       pal.forEach((w, k) => {
         const achada = prog && (prog.achadas?.[w.id] || []).length > 0;
         g.append(el('circle', { class: `ponto-palavra ${achada ? 'achada' : ''}`, cx: (k - (pal.length - 1) / 2) * 30, cy: R + 30, r: 8 }));
       });
-      if (estado !== 'desconhecido') {
-        const t = el('text', { class: 'nome-corpo', y: R + 76 });
-        t.textContent = c.titulo;
+      if (nome) {
+        const t = el('text', { class: 'nome-corpo', y: R + (pal.length ? 76 : 40) });
+        t.textContent = nome.length > 22 ? `${nome.slice(0, 21)}…` : nome;
         g.append(t);
       }
       const escolher = () => {
@@ -126,60 +159,80 @@
         mostrarInfo();
       };
       g.addEventListener('click', escolher);
-      g.addEventListener('keydown', (e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), escolher()));
+      g.addEventListener('keydown', (ev) => (ev.key === 'Enter' || ev.key === ' ') && (ev.preventDefault(), escolher()));
       M.append(g);
     });
   }
 
   function mostrarInfo() {
     const info = $('#info');
-    const c = sistema.corpos.find((x) => x.id === selecionado);
-    if (!c) {
-      Lab.mount(info, h('p', { style: 'margin:0' }, 'Toque num tema para abrir.'));
-      info.hidden = false;
-      return;
+    info.hidden = false;
+    const c = lista.find((x) => x.id === selecionado);
+    if (!c) return Lab.mount(info, h('p', { style: 'margin:0' }, 'Toque num tema para abrir.'));
+    if (c.origem === 'desconhecido') return Lab.mount(info, h('h2', {}, '? ? ?'), h('p', {}, 'Ainda nenhuma pista leva até este tema.'));
+    if (c.origem === 'novo') {
+      return Lab.mount(info, h('h2', {}, 'Novo estudo'), h('p', {}, 'Monte um mapa de perguntas sobre um tema, teste e compartilhe o arquivo com outras pessoas.'),
+        h('div', { class: 'linha' },
+          h('button', { class: 'btn primary', onclick: () => Editor.abrir(Estudos.novo(), ctx) }, 'Criar estudo'),
+          h('button', { class: 'btn', onclick: importar }, 'Importar')));
     }
-    if (!c.pacote) {
-      Lab.mount(info, h('h2', {}, '? ? ?'), h('p', {}, 'Ainda nenhuma pista leva até este tema.'));
-      info.hidden = false;
-      return;
-    }
-    const d = pacotes[c.id];
-    const p = progressoDe(c.id) || INICIAL;
+    const d = c.estudo;
+    const p = progressoDe(d.id) || INICIAL;
     const palavras = d.palavras.filter((w) => (p.achadas?.[w.id] || []).length).length;
+    const erros = Estudos.validar(d).erros.length;
+    const autor = d.autor?.nome?.trim();
+    const editar = () => Editor.abrir(d, ctx);
+    const duplicar = () => {
+      const copia = Estudos.duplicar(d);
+      Estudos.salvar(copia, 'meu');
+      toast('Cópia criada. Ela é sua para editar.', 'ok');
+      Editor.abrir(copia, ctx);
+    };
     Lab.mount(
       info,
-      h('h2', {}, c.titulo),
-      h('p', {}, p.visitado ? `${p.resolvidos.length} de ${d.nos.length} entendidos · ${palavras} de ${d.palavras.length} palavras` : 'Você ainda não começou este tema.'),
-      h('button', { class: 'btn primary', onclick: () => abrirConstelacao(c) }, p.visitado ? 'Continuar' : 'Abrir'),
+      h('h2', {}, d.titulo),
+      (autor || c.origem !== 'embutido') && h('p', { class: 'autor' }, [autor ? `por ${autor}` : 'sem autor', d.licenca, c.origem === 'importado' && 'importado'].filter(Boolean).join(' · ')),
+      erros
+        ? h('p', { class: 'aviso' }, `Rascunho: ${erros} ${erros === 1 ? 'erro' : 'erros'} a corrigir no editor antes de jogar.`)
+        : h('p', {}, p.visitado ? `${p.resolvidos.length} de ${d.nos.length} entendidos${d.palavras.length ? ` · ${palavras} de ${d.palavras.length} palavras` : ''}` : 'Você ainda não começou este estudo.'),
+      h('div', { class: 'linha' },
+        !erros && h('button', { class: 'btn primary', onclick: () => abrirEstudo(d) }, p.visitado ? 'Continuar' : 'Abrir'),
+        c.origem === 'meu' ? h('button', { class: 'btn', onclick: editar }, 'Editar') : h('button', { class: 'btn', onclick: duplicar }, 'Duplicar para editar'),
+        c.origem !== 'embutido' && h('button', { class: 'btn', onclick: () => excluir(c) }, 'Excluir')),
     );
-    info.hidden = false;
   }
 
-  function garantirDefs() {
-    const D = lousa.defs;
-    if (D.querySelector('#seta-tema')) return;
-    for (const t of Object.keys(TIPOS)) {
-      const m = el('marker', { id: `seta-${t}`, viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 5, markerHeight: 5, orient: 'auto-start-reverse' });
-      m.append(el('path', { d: 'M0,0 L10,5 L0,10 z', class: `seta-${t}` }));
-      D.append(m);
-    }
+  async function excluir(c) {
+    const r = await modal({
+      title: `Excluir "${c.estudo.titulo}"?`,
+      body: h('p', {}, c.origem === 'meu' ? 'O estudo e o seu progresso nele saem deste aparelho. Exporte antes se quiser guardar uma cópia.' : 'O estudo importado e o seu progresso nele saem deste aparelho.'),
+      actions: [
+        { label: 'Cancelar', value: null },
+        { label: 'Excluir', value: true, primary: true },
+      ],
+    });
+    if (!r) return;
+    Estudos.remover(c.id);
+    selecionado = null;
+    mostrarSistema();
   }
 
   // ======================================================================
-  // Mapa de perguntas de um tema
+  // Mapa de perguntas de um estudo
   // ======================================================================
-  function abrirConstelacao(corpo) {
+  // `chave` separa o progresso (o editor testa com uma chave própria) e
+  // `voltar` decide para onde o botão ← leva.
+  function abrirEstudo(data, { chave = data.id, voltar = null } = {}) {
     $('#info').hidden = true;
-    const data = pacotes[corpo.id];
-    const prog = Lab.progress(corpo.id, INICIAL);
+    const teste = !!voltar;
+    const prog = Lab.progress(chave, INICIAL);
     const S = prog.data;
     S.visitado = true;
     prog.save();
     const byId = new Map(data.nos.map((n) => [n.id, n]));
     const palavras = new Map(data.palavras.map((w) => [w.id, w]));
     const wid = (w) => `w:${w.id}`;
-    const pos = layout(data);
+    const pos = Desenho.posicoes(data);
     let destaque = new Set();
 
     // ---------------- estado derivado ----------------
@@ -196,7 +249,7 @@
     // Nós de passagem onde a palavra já foi encontrada.
     const nosDaPalavra = (w) => data.nos.filter((n) => n.passagem && achadas(w).some((a) => Lab.inRange(a.verso, data.passagens[n.passagem].osis)));
 
-    tela = { tipo: 'constelacao', enquadrar };
+    tela = { tipo: 'estudo', enquadrar, voltar: voltar || (() => ctx.temas(data.id)) };
     render();
     enquadrar();
     if (!S.convite) convite();
@@ -211,9 +264,10 @@
     }
 
     function render() {
-      hud(corpo.titulo, `${S.resolvidos.length} de ${data.nos.length} entendidos · ${data.palavras.filter(descoberta).length} de ${data.palavras.length} palavras`, true);
+      const pal = data.palavras.length ? ` · ${data.palavras.filter(descoberta).length} de ${data.palavras.length} palavras` : '';
+      hud(teste ? `Teste: ${data.titulo}` : data.titulo, `${S.resolvidos.length} de ${data.nos.length} entendidos${pal}`, true);
       lousa.limpar();
-      garantirDefs();
+      Desenho.garantirDefs(lousa);
       const M = lousa.mundo;
       const nos = data.nos.filter((n) => isVisible(n.id));
       const pals = data.palavras.filter(descoberta);
@@ -380,10 +434,7 @@
       if (n.deducao) return concluirSintese(n);
       S.resolvidos.push(n.id);
       prog.save();
-      destaque = new Set(n.pistas.map((p) => p.para).filter((id) => !isResolved(id)));
-      render();
-      mostrarNovos(n);
-      avisoEntendido(n);
+      entendeu(n);
     }
 
     // Modo de teste: encontra todos os usos da palavra e confirma todas as facetas.
@@ -408,9 +459,15 @@
       prog.save();
       toast.hide();
       buzz(40);
+      entendeu(n);
+    }
+
+    function entendeu(n) {
       destaque = new Set(n.pistas.map((p) => p.para).filter((id) => !isResolved(id)));
       render();
       mostrarNovos(n);
+      // Estudo sem síntese de arrastar: termina quando tudo foi entendido.
+      if (data.nos.every((x) => isResolved(x.id))) return fim();
       avisoEntendido(n);
     }
 
@@ -663,9 +720,27 @@
       buzz(60);
       render();
       await modal({ title: `✓ ${n.titulo}`, body: h('div', { class: 'revelacao' }, n.revelacao), actions: [{ label: 'Continuar', value: true, primary: true }] });
+      fim();
+    }
+
+    async function fim() {
+      S.completo = true;
+      prog.save();
+      if (teste) {
+        const r = await modal({
+          title: 'Estudo completo',
+          body: h('p', {}, 'O teste chegou ao fim: todas as perguntas foram entendidas.'),
+          actions: [
+            { label: 'Continuar no teste', value: null },
+            { label: 'Voltar ao editor', value: true, primary: true },
+          ],
+        });
+        if (r) voltar();
+        return;
+      }
       const r = await modal({
-        title: 'Tema completo',
-        body: h('p', {}, 'Você chegou à síntese. Quer registrar a sessão no diário agora?'),
+        title: 'Estudo completo',
+        body: h('p', {}, 'Você chegou ao fim deste estudo. Quer registrar a sessão no diário agora?'),
         actions: [
           { label: 'Continuar explorando', value: null },
           { label: 'Abrir o diário', value: true, primary: true },
@@ -675,17 +750,17 @@
     }
 
     function convite() {
-      Lab.escolha({ title: data.convite.pergunta, opcoes: data.convite.opcoes, dismissable: false }).then((op) => {
+      const cv = Estudos.convite(data);
+      Lab.escolha({ title: cv.pergunta, opcoes: cv.opcoes, dismissable: false }).then((op) => {
         S.convite = true;
         prog.save();
-        if (op && op.leva_a) abrir(byId.get(op.leva_a));
+        if (op && byId.has(op.leva_a)) abrir(byId.get(op.leva_a));
       });
     }
 
     tela.recomecar = () => {
       prog.reset();
-      selecionado = corpo.id;
-      mostrarSistema();
+      tela.voltar();
     };
   }
 
@@ -697,8 +772,9 @@
     const opcoes = [
       { k: 'traducao', texto: `Tradução: ${t ? t.shortName || t.name : 'escolher'}` },
       { k: 'diario', texto: 'Diário' },
+      { k: 'importar', texto: 'Importar estudo' },
       { k: 'encerrar', texto: 'Encerrar a sessão (diário)' },
-      tela?.recomecar && { k: 'recomecar', texto: 'Recomeçar este tema' },
+      tela?.recomecar && { k: 'recomecar', texto: 'Recomeçar este estudo' },
       { k: 'sobre', texto: 'Sobre o texto bíblico' },
       { k: 'teste', texto: `Modo de teste: ${modoTeste() ? 'ligado' : 'desligado'}` },
     ].filter(Boolean);
@@ -709,11 +785,12 @@
         await Lab.chooseTranslation();
       } catch {}
     } else if (op.k === 'diario') verDiario();
+    else if (op.k === 'importar') importar();
     else if (op.k === 'encerrar') Lab.endSession('constelacao');
     else if (op.k === 'recomecar') {
       const r = await modal({
-        title: 'Recomeçar este tema?',
-        body: h('p', {}, 'Apaga o progresso deste tema. O diário é mantido.'),
+        title: 'Recomeçar este estudo?',
+        body: h('p', {}, 'Apaga o progresso deste estudo. O diário é mantido.'),
         actions: [
           { label: 'Cancelar', value: null },
           { label: 'Apagar progresso', value: true, primary: true },
@@ -728,6 +805,67 @@
       const tr = Lab.bible.current();
       modal({ title: 'Texto bíblico', body: h('div', {}, h('p', {}, tr ? tr.name : 'Nenhuma tradução escolhida.'), tr?.licenseNotice && h('p', { class: 'muted' }, tr.licenseNotice)) });
     }
+  }
+
+  // ======================================================================
+  // Importar um estudo de outra pessoa
+  // ======================================================================
+  // O arquivo vem de fora: a estrutura é conferida antes de instalar e todo o
+  // conteúdo é mostrado só como texto.
+  async function importar() {
+    const area = h('textarea', { rows: 6, placeholder: 'Cole aqui o texto do estudo (JSON)…', 'aria-label': 'Texto do estudo' });
+    const arquivo = h('input', { type: 'file', accept: '.json,application/json', 'aria-label': 'Arquivo do estudo' });
+    arquivo.addEventListener('change', () => {
+      const f = arquivo.files[0];
+      if (!f) return;
+      if (f.size > 2e6) return toast('O arquivo é grande demais para um estudo.', 'erro');
+      const r = new FileReader();
+      r.onload = () => (area.value = String(r.result));
+      r.readAsText(f);
+    });
+    const ok = await modal({
+      title: 'Importar estudo',
+      body: h('div', { class: 'form' }, h('p', {}, 'Escolha o arquivo que recebeu ou cole o texto dele.'), h('label', {}, 'Arquivo', arquivo), h('label', {}, 'Ou cole o texto', area)),
+      actions: [
+        { label: 'Cancelar', value: null },
+        { label: 'Conferir', value: true, primary: true },
+      ],
+    });
+    if (!ok) return;
+    let e;
+    try {
+      e = JSON.parse(area.value);
+    } catch {
+      return modal({ title: 'Não consegui ler', body: h('p', {}, 'O texto não é um arquivo de estudo válido (JSON).') });
+    }
+    const motivo = Estudos.estruturaInvalida(e);
+    if (motivo) return modal({ title: 'Não dá para importar', body: h('p', {}, motivo) });
+    Estudos.preparar(e);
+    const { erros, avisos } = Estudos.validar(e);
+    if (erros.length) {
+      return modal({ title: 'Não dá para importar', body: h('div', {}, h('p', {}, 'O estudo tem erros que impedem jogar:'), h('ul', {}, erros.slice(0, 8).map((x) => h('li', {}, x.msg)))) });
+    }
+    const existente = Estudos.locais()[e.id];
+    const embutido = embutidos.some((x) => x.id === e.id);
+    const r = await modal({
+      title: e.titulo,
+      body: h('div', {},
+        h('p', { class: 'autor' }, [e.autor?.nome?.trim() ? `por ${e.autor.nome.trim()}` : 'sem autor', e.licenca, `versão ${e.versao || 1}`].filter(Boolean).join(' · ')),
+        e.descricao && h('p', {}, e.descricao),
+        h('p', {}, `${e.nos.length} ${e.nos.length === 1 ? 'pergunta' : 'perguntas'}${e.palavras.length ? ` · ${e.palavras.length} palavras` : ''}${avisos.length ? ` · ${avisos.length} ${avisos.length === 1 ? 'aviso' : 'avisos'} de design` : ''}`),
+        existente && h('p', { class: 'aviso' }, `Você já tem este estudo (versão ${existente.estudo.versao || 1}). Instalar substitui o que está no aparelho; seu progresso continua.`),
+        embutido && h('p', { class: 'aviso' }, 'Este estudo já vem com o jogo. Ele será instalado como uma cópia separada.')),
+      actions: [
+        { label: 'Cancelar', value: null },
+        { label: existente ? 'Substituir' : 'Instalar', value: true, primary: true },
+      ],
+    });
+    if (!r) return;
+    if (embutido) e.id = Estudos.novoId();
+    // Um estudo seu volta como seu; o de outra pessoa fica como importado.
+    Estudos.salvar(e, existente?.origem === 'meu' ? 'meu' : 'importado');
+    toast(`"${e.titulo}" está na tela de temas.`, 'ok');
+    ctx.temas(e.id);
   }
 
   function verDiario() {
@@ -759,96 +897,5 @@
         }),
       ),
     });
-  }
-
-  // ======================================================================
-  // Desenho e layout
-  // ======================================================================
-  function raio(n) {
-    return n.tipo === 'sintese' ? 44 : 32;
-  }
-  function txt(cls, s) {
-    const t = el('text', { class: cls });
-    t.textContent = s;
-    return t;
-  }
-  function selo(g, x, y, texto, extra = '') {
-    g.append(el('circle', { class: `selo ${extra}`, cx: x, cy: y, r: 13 }));
-    const t = txt('selo-txt', texto);
-    t.setAttribute('x', x);
-    t.setAttribute('y', y);
-    g.append(t);
-  }
-  function linha2(a, b, ra, rb, cls) {
-    const d = Math.hypot(b.x - a.x, b.y - a.y) || 1;
-    const ux = (b.x - a.x) / d;
-    const uy = (b.y - a.y) / d;
-    return el('line', { class: cls, x1: a.x + ux * ra, y1: a.y + uy * ra, x2: b.x - ux * rb, y2: b.y - uy * rb });
-  }
-  function noSvg(p, classes, label, onActivate) {
-    const g = el('g', { class: classes.filter(Boolean).join(' '), transform: `translate(${p.x},${p.y})`, tabindex: 0, role: 'button', 'aria-label': label });
-    g.addEventListener('click', onActivate);
-    g.addEventListener('keydown', (e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onActivate()));
-    return g;
-  }
-  function rotulo(g, texto, r) {
-    wrap(texto, 14).forEach((line, i) => {
-      const t = txt('rotulo', line);
-      t.setAttribute('y', r + 26 + i * 22);
-      g.append(t);
-    });
-  }
-  function wrap(text, max) {
-    const lines = [];
-    let cur = '';
-    for (const w of text.split(' ')) {
-      if (cur && (cur + ' ' + w).length > max) {
-        lines.push(cur);
-        cur = w;
-      } else cur = cur ? cur + ' ' + w : w;
-    }
-    if (cur) lines.push(cur);
-    return lines;
-  }
-  // Forças determinísticas sobre o grafo inteiro, para que nada mude de lugar
-  // quando novos nós aparecem.
-  function layout(data) {
-    const ids = [...data.nos.map((n) => n.id), ...data.palavras.map((w) => `w:${w.id}`)];
-    const idx = new Map(ids.map((id, i) => [id, i]));
-    const edges = [];
-    data.nos.forEach((n) => n.pistas.forEach((p) => edges.push([idx.get(n.id), idx.get(p.para), 210])));
-    data.palavras.forEach((w) => w.facetas.forEach((f) => edges.push([idx.get(`w:${w.id}`), idx.get(f.no), 170])));
-    const N = ids.length;
-    const P = ids.map((_, i) => ({ x: Math.cos((i / N) * Math.PI * 2) * 340, y: Math.sin((i / N) * Math.PI * 2) * 340 }));
-    const ITER = 800;
-    for (let it = 0; it < ITER; it++) {
-      const F = P.map(() => ({ x: 0, y: 0 }));
-      for (let i = 0; i < N; i++)
-        for (let j = 0; j < i; j++) {
-          const dx = P[i].x - P[j].x;
-          const dy = P[i].y - P[j].y;
-          const d2 = dx * dx + dy * dy + 0.01;
-          const d = Math.sqrt(d2);
-          const f = 100000 / d2;
-          F[i].x += (dx / d) * f; F[i].y += (dy / d) * f;
-          F[j].x -= (dx / d) * f; F[j].y -= (dy / d) * f;
-        }
-      for (const [a, b, len] of edges) {
-        const dx = P[b].x - P[a].x;
-        const dy = P[b].y - P[a].y;
-        const d = Math.hypot(dx, dy) || 1;
-        const f = (d - len) * 0.05;
-        F[a].x += (dx / d) * f; F[a].y += (dy / d) * f;
-        F[b].x -= (dx / d) * f; F[b].y -= (dy / d) * f;
-      }
-      const step = 1 - it / ITER;
-      for (let i = 0; i < N; i++) {
-        F[i].x -= P[i].x * 0.012;
-        F[i].y -= P[i].y * 0.012;
-        P[i].x += Math.max(-24, Math.min(24, F[i].x)) * step;
-        P[i].y += Math.max(-24, Math.min(24, F[i].y)) * step;
-      }
-    }
-    return Object.fromEntries(ids.map((id, i) => [id, P[i]]));
   }
 })();

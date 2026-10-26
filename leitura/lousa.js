@@ -122,9 +122,15 @@
     aplicar();
     // O ponto (em coordenadas do mundo) está dentro da vista, com folga?
     const contem = (x, y, folga = 0) => x > vb.x + folga && x < vb.x + vb.w - folga && y > vb.y + folga && y < vb.y + vb.h - folga;
+    // Ponto da tela (clientX, clientY) em coordenadas do mundo.
+    function paraMundo(cx, cy) {
+      const r = svg.getBoundingClientRect();
+      return { x: vb.x + ((cx - r.left) / r.width) * vb.w, y: vb.y + ((cy - r.top) / r.height) * vb.h };
+    }
+    const centro = () => ({ x: vb.x + vb.w / 2, y: vb.y + vb.h / 2 });
 
     return {
-      svg, defs, mundo, el, enquadrar, zoom, mover, contem,
+      svg, defs, mundo, el, enquadrar, zoom, mover, contem, paraMundo, centro,
       limpar() {
         mundo.replaceChildren();
       },

@@ -194,7 +194,7 @@
 
   // Janela modal. Resolve com o `value` da ação escolhida, ou null ao fechar.
   // `mount(close)` permite que o conteúdo feche a janela por conta própria.
-  function modal({ title, body, actions = [{ label: 'Ok', value: true, primary: true }], dismissable = true, className = '', mount = null }) {
+  function modal({ title, body, actions = [{ label: 'Ok', value: true, primary: true }], dismissable = true, className = '', mount = null, focar = true }) {
     return new Promise((resolve) => {
       const close = (val) => {
         back.classList.remove('show');
@@ -223,7 +223,7 @@
       document.body.append(back);
       requestAnimationFrame(() => back.classList.add('show'));
       document.addEventListener('keydown', onKey);
-      const first = box.querySelector('textarea, input, .btn.primary');
+      const first = focar && box.querySelector('textarea, input, .btn.primary');
       if (first) setTimeout(() => first.focus(), 50);
       if (mount) mount(close);
     });
@@ -321,15 +321,35 @@
   // `brilhos` faz palavras do texto brilharem: [{ id, verso, formas, achado }], em
   // que `formas` são palavras inteiras ("sábado") ou radicais terminados em "*".
   // Tocar numa delas chama `onBrilho(brilho, textoTocado)`.
-  function reader({ osis, contexto = null, title = null, prompt = '', select = false, foco = null, confirmLabel = null, brilhos = [], onBrilho = null }) {
+  // Para o editor há mais dois modos de seleção: `varios` (vários versículos,
+  // resolve com a lista de chaves) e `faixa` (dois toques marcam o começo e o
+  // fim, resolve com o intervalo OSIS). `marcados` traz a seleção anterior:
+  // uma lista de chaves, ou um intervalo no modo faixa.
+  function reader({ osis, contexto = null, title = null, prompt = '', select = false, varios = false, faixa = false, marcados = null, foco = null, confirmLabel = null, brilhos = [], onBrilho = null }) {
     return new Promise((resolve) => {
+      const modo = varios ? 'varios' : faixa ? 'faixa' : select ? 'um' : null;
       let selected = null;
+      let ordem = []; // chaves dos versículos na tela, em ordem
+      let marca = new Set();
+      let ini = null;
+      let fim = null;
+      if (faixa && marcados) {
+        const r = parseRange(marcados);
+        ini = keyOf(r.book, r.from.ch, r.from.v);
+        fim = keyOf(r.book, r.to.ch, r.to.v);
+      } else if (varios && marcados) marca = new Set(marcados);
       let showingContext = false;
       const list = h('div', { class: 'versos', 'aria-live': 'polite' }, h('p', { class: 'carregando' }, 'Carregando o texto…'));
-      const confirm = select
-        ? h('button', { class: 'btn primary', disabled: true, onclick: () => done(selected) }, confirmLabel || 'É isso')
+      const resultado = () => {
+        if (modo === 'um') return selected;
+        if (modo === 'varios') return ordem.filter((k) => marca.has(k));
+        return ini === fim || !fim ? ini : `${ini}-${fim}`;
+      };
+      const confirm = modo
+        ? h('button', { class: 'btn primary', disabled: true, onclick: () => done(resultado()) }, confirmLabel || (modo === 'um' ? 'É isso' : 'Confirmar'))
         : h('button', { class: 'btn primary', onclick: () => done(true) }, confirmLabel || 'Terminei de ler');
-      const status = h('span', { class: 'sel-status' }, select ? 'Toque no versículo' : '');
+      const AJUDA = { um: 'Toque no versículo', varios: 'Toque nos versículos', faixa: 'Toque no primeiro e no último versículo' };
+      const status = h('span', { class: 'sel-status' }, modo ? AJUDA[modo] : '');
       const ctxBtn =
         contexto &&
         h('button', { class: 'btn link', onclick: () => {
@@ -383,13 +403,13 @@
             if (x.ch !== lastCh && (passage.from.ch !== passage.to.ch || showingContext)) nodes.push(h('div', { class: 'cap' }, `Capítulo ${x.ch}`));
             lastCh = x.ch;
             const inPassage = inRange(x.key, passage);
-            const cls = ['verso', showingContext && !inPassage ? 'contexto' : '', foco && !inRange(x.key, foco) ? 'fora' : '', selected === x.key ? 'sel' : '']
+            const cls = ['verso', showingContext && !inPassage ? 'contexto' : '', foco && !inRange(x.key, foco) ? 'fora' : '']
               .filter(Boolean)
               .join(' ');
             nodes.push(
               h(
-                select ? 'button' : 'p',
-                { class: cls, 'data-key': x.key, onclick: select ? () => pick(x.key) : null },
+                modo ? 'button' : 'p',
+                { class: cls, 'data-key': x.key, onclick: modo ? () => pick(x.key) : null },
                 h('sup', {}, x.v),
                 ' ',
                 comBrilhos(x),
@@ -398,6 +418,8 @@
           }
           if (!nodes.length) nodes.push(h('p', { class: 'erro' }, 'Esta tradução não trouxe versículos para esse trecho.'));
           list.replaceChildren(...nodes);
+          ordem = verses.map((x) => x.key);
+          if (modo) marcar();
         } catch (e) {
           console.error(e);
           list.replaceChildren(
@@ -449,15 +471,29 @@
         buzz(15);
         if (onBrilho) await onBrilho(b, txt);
         b.achado = true;
-        list.querySelectorAll(`.brilho[data-brilho="${b.id}"]`).forEach((el) => el.classList.add('achado'));
+        list.querySelectorAll(`.brilho[data-brilho="${CSS.escape(b.id)}"]`).forEach((el) => el.classList.add('achado'));
       }
 
       function pick(key) {
-        selected = key;
         buzz(10);
-        list.querySelectorAll('.verso').forEach((el) => el.classList.toggle('sel', el.dataset.key === key));
-        status.textContent = `Selecionado: ${fmtRef(key)}`;
-        confirm.disabled = false;
+        if (modo === 'um') selected = key;
+        else if (modo === 'varios') marca.has(key) ? marca.delete(key) : marca.add(key);
+        else if (!ini || fim) [ini, fim] = [key, null];
+        else [ini, fim] = ordem.indexOf(key) < ordem.indexOf(ini) ? [key, ini] : [ini, key];
+        marcar();
+      }
+
+      // Destaca a seleção atual e atualiza o rodapé.
+      function marcar() {
+        const a = ordem.indexOf(ini);
+        const z = fim ? ordem.indexOf(fim) : a;
+        const sel = (k, i) => (modo === 'um' ? k === selected : modo === 'varios' ? marca.has(k) : ini != null && i >= a && i <= z);
+        list.querySelectorAll('.verso').forEach((el) => el.classList.toggle('sel', sel(el.dataset.key, ordem.indexOf(el.dataset.key))));
+        const r = resultado();
+        if (modo === 'um') status.textContent = r ? `Selecionado: ${fmtRef(r)}` : AJUDA.um;
+        else if (modo === 'varios') status.textContent = r.length ? `${r.length} ${r.length === 1 ? 'versículo' : 'versículos'}: ${r.map(fmtRef).join(', ')}` : AJUDA.varios;
+        else status.textContent = !ini ? AJUDA.faixa : !fim ? `Começa em ${fmtRef(ini)}. Toque no último.` : `Trecho: ${fmtRef(r)}`;
+        confirm.disabled = modo === 'varios' ? !r.length : !r;
       }
 
       render();

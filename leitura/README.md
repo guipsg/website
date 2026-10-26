@@ -5,7 +5,8 @@ Protótipo pessoal de um jogo de estudo bíblico inspirado no ship log de
 
 Ele saiu de uma rodada de testes com cinco protótipos. Cadernos foi
 descartado, e as mecânicas que funcionaram (grafo de perguntas, léxico,
-dedução) foram juntadas num jogo só.
+dedução) foram juntadas num jogo só. Um editor permite criar estudos
+novos e trocá-los com outras pessoas em arquivo.
 
 ## Como o jogo funciona
 
@@ -13,13 +14,17 @@ Duas telas num quadro de tela cheia (papel pontilhado, claro ou escuro
 conforme o tema do aparelho). Arraste para mover; aproxime com pinça, roda
 do mouse ou os botões + e −. O botão ⤢ enquadra tudo.
 
-1. **Temas:** a tela de seleção. Cada círculo é um tema.
-   - Preenchido com a cor do tema: você já começou.
+1. **Temas:** a tela de seleção. Cada círculo é um estudo: os que vêm
+   com o jogo, os que você criou e os que importou.
+   - Preenchido com a cor do estudo: você já começou.
    - Só o contorno: disponível, ainda não começado.
+   - Tracejado com "+": criar um estudo novo ou importar um.
    - Tracejado com "?": ainda desconhecido.
 
-   Os pontinhos embaixo são as palavras hebraicas do tema, preenchidos
-   quando descobertos. Toque num tema e em "Abrir".
+   Os pontinhos embaixo são as palavras hebraicas do estudo, preenchidos
+   quando descobertos. Toque num estudo para ver o autor e as ações:
+   Abrir, Editar (os seus), Duplicar para editar (os do jogo e os
+   importados) e Excluir.
 2. **Mapa de perguntas:** o grafo do tema.
    - **Nó de passagem:** um "?" aparece quando uma pista aponta para ele.
      Você lê e marca o versículo que responde. Alguns deixam prever a
@@ -44,8 +49,51 @@ do mouse ou os botões + e −. O botão ⤢ enquadra tudo.
      distratores: quando todas as lacunas estão preenchidas, as erradas
      ficam marcadas em vermelho até serem trocadas.
 
-O menu (☰) tem a tradução, o diário, o encerramento da sessão e a opção
-de recomeçar o tema.
+Um estudo termina na síntese de arrastar, quando tem uma, ou quando
+todas as perguntas foram entendidas.
+
+O menu (☰) tem a tradução, o diário, a importação de estudos, o
+encerramento da sessão e a opção de recomeçar o estudo.
+
+## Criar e compartilhar estudos
+
+Em Temas, toque no "+" e em **Criar estudo**. O editor usa o mesmo
+quadro do jogo, com uma barra embaixo:
+
+- **+ Nó** cria uma pergunta no meio da vista e abre o painel dela.
+- **Toque num nó** para editar: tipo (início, pergunta ou síntese),
+  título, pergunta, passagem (escrita em português, como `Gn 2:1-3` ou
+  `Mc 2:23–3:6`), contexto, evidência e dica (marcadas tocando nos
+  versículos, no próprio leitor), revelação, retorno ao errar, previsão
+  e, na síntese, quais perguntas ela exige. Cada campo tem uma frase de
+  orientação.
+- **Arraste um nó** para mudar o lugar dele. O quadro se move arrastando
+  o vazio.
+- **Ligar a outro nó** (no painel) cria uma pista: toque no nó de
+  destino, escolha o tipo de ligação e escreva o texto. Tocar no vazio
+  cancela.
+- **Estudo** tem título, descrição, pergunta central, cor, autor e
+  licença. O nome do autor fica guardado para os próximos estudos.
+- **Verificar** lista os erros (impedem testar e exportar) e os avisos
+  (conselhos de design, como perguntas que pedem só um fato). Tocar num
+  item abre o nó. O topo mostra a contagem o tempo todo, e os nós com
+  erro levam um "⚠".
+- **Testar** joga o rascunho do zero, com um progresso separado, e
+  "Voltar ao editor" no fim.
+- **Exportar** sobe a versão do estudo e oferece o arquivo
+  (`.estudo.json`) para baixar ou copiar.
+
+Tudo é salvo no aparelho a cada mudança. Quem recebe o arquivo abre pelo
+menu → **Importar estudo**, escolhendo o arquivo ou colando o texto. A
+importação confere a estrutura e os erros antes de instalar, e mostra o
+título, o autor, a licença e o tamanho do estudo. Se o estudo já existe
+no aparelho, a versão nova substitui a antiga e o progresso continua.
+
+O conteúdo importado é sempre exibido como texto, nunca como HTML.
+
+Nesta fase o editor ainda não cria palavras hebraicas nem a síntese de
+arrastar. Um estudo duplicado mantém as dele, e elas podem ser movidas no
+mapa.
 
 ### Modo de teste
 
@@ -69,17 +117,20 @@ bloqueia a leitura dos JSON.
 
 ```
 leitura/
-  index.html          página do jogo (estilos da lousa e das janelas)
-  app.js              telas Temas e mapa de perguntas, palavras, síntese, menu
+  index.html          página do jogo (estilos da lousa, das janelas e do editor)
+  app.js              telas Temas e mapa de perguntas, palavras, síntese, menu, importação
+  editor.js           editor de estudos
+  estudos.js          formato dos estudos, armazenamento, referências em português, validação
+  desenho.js          desenho de nós e pistas, posicionamento
   lousa.js            superfície SVG em tela cheia com arrastar e zoom
-  shared/base.js      API da Bíblia, leitor (com palavras que brilham), janelas, progresso, diário
+  shared/base.js      API da Bíblia, leitor (palavras que brilham, seleção de versículos), janelas, progresso, diário
   shared/base.css     estilos comuns, mobile primeiro, tema claro/escuro
-  conteudo/sistema.json   temas da tela de seleção
-  conteudo/descanso.json  o tema Descanso
+  conteudo/sistema.json   estudos que vêm com o jogo e temas desconhecidos
+  conteudo/descanso.json  o estudo Descanso
 ```
 
-O progresso de cada tema e o diário ficam no `localStorage` do
-aparelho.
+O progresso de cada estudo, os estudos criados ou importados e o diário
+ficam no `localStorage` do aparelho.
 
 ### Tradução (API da AO Lab)
 
@@ -99,19 +150,28 @@ o leitor resolve na tradução escolhida.
 ### `sistema.json`
 
 ```jsonc
-{ "corpos": [
-  { "id": "descanso", "titulo": "Descanso", "pacote": "descanso.json", "cor": "#d9a441", "raio": 62 },
-  { "id": "cordeiro", "titulo": "O Cordeiro", "pacote": null, "cor": "#c7685a", "raio": 48, "luas": 2 }  // sem pacote: desconhecido; "luas" = quantos pontos de palavra mostrar
-] }
+{
+  "estudos": ["descanso.json"],                         // estudos que vêm com o jogo
+  "desconhecidos": [{ "id": "cordeiro", "luas": 2 }]    // círculos "?"; "luas" = pontos de palavra
+}
 ```
 
-### Pacote de tema
+### Estudo (formato 4)
+
+O mesmo arquivo serve para os estudos do jogo, os criados no editor e os
+trocados entre pessoas.
 
 ```jsonc
 {
-  "prototipo": "constelacao", "versao": 3,
-  "tema": "...", "pergunta_central": "...",
-  "convite": { "pergunta": "...", "opcoes": [{ "texto": "...", "leva_a": "<id de nó ou null>" }] },
+  "formato": "estudo-biblico", "versao_formato": 4,
+  "id": "descanso",                       // estável: o progresso fica guardado por ele
+  "versao": 1,                            // sobe a cada exportação
+  "criado_em": "…", "atualizado_em": "…",
+  "autor": { "nome": "…" }, "licenca": "CC BY 4.0", "idioma": "pt-BR",
+  "traducao_referencia": "porbr2018",     // a tradução usada ao escrever
+  "titulo": "Descanso", "descricao": "…", "cor": "#d9a441",
+  "pergunta_central": "...",
+  "convite": { "pergunta": "...", "opcoes": [{ "texto": "...", "leva_a": "<id de nó ou null>" }] },  // opcional: sem ele, o jogo monta um com os nós de início
   "passagens": { "<id>": { "ref": "Gn 2:1-3", "osis": "Gen.2.1-Gen.2.3", "contexto": "opcional" } },
   "nos": [{
     "id": "...", "tipo": "inicio | pergunta | sintese", "titulo": "...",
@@ -122,8 +182,9 @@ o leitor resolve na tradução escolhida.
     "previsao": { "pergunta": "...", "opcoes": ["..."], "correta": 0, "retorno": "..." },  // opcional
     "revelacao": "...",
     "pistas": [{ "para": "<id>", "tipo": "citacao | mesma_palavra | alusao | tema", "texto": "..." }],
-    "requer": ["<ids>"], "requer_palavras": ["<ids>"],   // só na síntese
-    "deducao": {                                        // só na síntese
+    "pos": { "x": 0, "y": 0 },           // opcional: lugar no mapa (o editor sempre grava)
+    "requer": ["<ids>"], "requer_palavras": ["<ids>"],   // opcional: a pergunta só abre depois destes
+    "deducao": {                                        // opcional, só na síntese de arrastar
       "fichas": [{ "texto": "shavat", "palavra": "shabat" }],
       "frases": [{ "id": "f1", "modelo": "… {a} …", "lacunas": { "a": "shavat" } }]
     }
@@ -135,11 +196,14 @@ o leitor resolve na tradução escolhida.
     "raiz": { "letras": "ש ב ת", "translit": "sh-b-t", "sentido": "cessar", "familia": [{ "palavra": "…", "translit": "…", "sentido": "…" }] },
     "ocorrencias": [{ "verso": "Gen.2.2", "formas": ["repousou", "descansou"], "nota": "opcional" }],
     "facetas": [{ "id": "...", "descricao": "...", "no": "<nó cuja passagem revela esta faceta>" }],
-    "sintese": "..."
+    "sintese": "...",
+    "pos": { "x": 0, "y": 0 }            // opcional
   }]
 }
 ```
 
+- Os arquivos não trazem texto bíblico, só referências OSIS.
+- Um nó do tipo síntese sem `deducao` funciona como uma pergunta comum.
 - `formas` são as palavras do texto que brilham naquele versículo:
   palavras inteiras, ou radicais terminados em `*`. Liste as variações das
   traduções mais comuns ("sábado", "repouso"…). Num mesmo versículo, duas

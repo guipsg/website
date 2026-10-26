@@ -790,6 +790,8 @@
         campo('Cor', 'A cor do estudo na tela de temas.', cor),
         campo('Autor', 'Aparece para quem receber o estudo. Fica guardado para os próximos.', autor),
         campo('Licença', 'O que outras pessoas podem fazer com o seu estudo.', seletor(Estudos.LICENCAS.map((l) => [l, l]), E.licenca, (v) => { E.licenca = v; salvar(); }, 'Licença')),
+        campo('Artigo', 'O mural lido como um texto corrido: as notas maduras viram seções e as em andamento fecham como perguntas em aberto.',
+          h('button', { class: 'btn', type: 'button', onclick: () => { fechar(null); Artigo.abrir(E); } }, 'Ver como artigo')),
         campo('Compartilhar', 'O arquivo leva o mural inteiro: quem só joga vê as notas maduras; quem duplica vê também as suas anotações.',
           h('button', { class: 'btn primary', type: 'button', onclick: () => { fechar(null); exportar(); } }, 'Exportar'))),
       actions: [{ label: 'Fechar', value: null, primary: true }],
@@ -818,12 +820,13 @@
         faltas.length > 0 && h('h3', {}, `Notas em andamento (${faltas.length})`),
         faltas.length > 0 && h('p', { class: 'guia' }, 'Não impedem nada: só as notas maduras entram no jogo. Toque para continuar de onde parou.'),
         faltas.map((x) => item(x, 'falta', `${nome(porId(x.no))}: ${x.msg}`, x.camada)),
-        !erros.length && !faltas.length && h('p', { class: 'status ok' }, '✓ Todas as notas amadureceram. Dá para testar e exportar.'),
+        !erros.length && !faltas.length && h('p', { class: 'status ok' }, '✓ Todas as notas amadureceram. Dá para testar, exportar e transformar o mural em artigo.'),
+        !erros.length && !faltas.length && h('button', { class: 'btn primary', onclick: () => { fechar(null); Artigo.abrir(E); } }, 'Transformar em artigo'),
         avisos.length > 0 && h('h3', {}, `Conselhos (${avisos.length})`),
         avisos.map((x) => item(x, 'aviso', `△ ${x.msg}`))),
-      actions: [{ label: 'Fechar', value: null, primary: true }],
+      actions: [(erros.length || faltas.length) && E.nos.some(madura) && { label: 'Ver como artigo', value: 'artigo' }, { label: 'Fechar', value: null, primary: true }].filter(Boolean),
       mount: (close) => (fechar = close),
-    });
+    }).then((r) => r === 'artigo' && Artigo.abrir(E));
   }
 
   function testar() {
@@ -838,7 +841,7 @@
     const fora = E.nos.length - jogo.nos.length;
     sel = ligando = null;
     const estudo = E;
-    ctx.abrirEstudo(Estudos.preparar(jogo), { chave, voltar: () => abrir(estudo, ctx) });
+    ctx.abrirEstudo(Estudos.preparar(jogo), { chave, voltar: () => abrir(estudo, ctx), artigo: estudo });
     if (fora) toast(`${fora} ${fora === 1 ? 'nota em andamento ficou' : 'notas em andamento ficaram'} de fora do teste.`);
   }
 

@@ -1,12 +1,9 @@
 {
   "estudos": [
-    "descanso.json"
+    "descanso.json",
+    "cordeiro.json"
   ],
   "desconhecidos": [
-    {
-      "id": "cordeiro",
-      "luas": 2
-    },
     {
       "id": "melquisedeque",
       "luas": 1

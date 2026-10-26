@@ -180,7 +180,7 @@
       else if (k === 'html') el.innerHTML = v;
       else el.setAttribute(k, v === true ? '' : v);
     }
-    for (const kid of kids.flat()) {
+    for (const kid of kids.flat(Infinity)) {
       if (kid == null || kid === false) continue;
       el.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
     }

@@ -104,6 +104,42 @@ do jogo, com uma barra embaixo: **+ Nota, Ler, Falta, Testar, Estudo**.
   quem joga vê as notas maduras, e quem duplica vê também as anotações em
   andamento do autor.
 
+### O estudo como artigo
+
+No fim, o mural vira um texto corrido, no estilo de uma newsletter
+(Substack). Ele aparece em três lugares: no botão **Artigo** do cartão em
+Temas, em **Ler como artigo** ao terminar um estudo e no mural (em
+"Estudo", ou em "Falta" quando todas as notas amadureceram).
+
+- **Cabeçalho:** título, a pergunta central como subtítulo, autor, data e
+  tempo de leitura.
+- **Seções:** cada nota madura vira uma, com o nome, a pergunta, a nota de
+  quem criou, os versículos da resposta (buscados na tradução em uso) e a
+  revelação. A ordem segue as ligações: uma nota vem depois das que levam
+  até ela, e a síntese fecha. O motivo de cada ligação aparece como ponte
+  antes da nota seguinte.
+- **Fim:** as palavras do estudo, se houver, e **Ainda em aberto**, com as
+  notas em andamento como perguntas.
+- **Copiar** leva o artigo com formatação, para colar no editor do
+  Substack. **Baixar** gera uma página HTML avulsa.
+
+### Estudo de referência: O Cordeiro
+
+"O Cordeiro" vem com o jogo como exemplo de mural deixado quase incompleto
+de propósito.
+
+- **Maduras (3):** "Deus proverá" (Gn 22), "Sangue na porta" (Êx 12) e
+  "Eis o Cordeiro" (Jo 1). Elas já dão um jogo curto.
+- **Em andamento (5):** cada uma numa camada diferente.
+  - Só a nota: Abel e 1 Pedro.
+  - Nota e texto: Ap 5.
+  - Até a pergunta: Is 53.
+  - Faltando só a revelação: Jo 19.
+- **Ligações:** algumas com motivo, outras ainda sem.
+
+Abra o artigo dele para ver como fica um estudo em andamento. Para mexer,
+use "Duplicar para editar".
+
 Tudo é salvo no aparelho a cada mudança. Quem recebe o arquivo abre pelo
 menu → **Importar estudo**, escolhendo o arquivo ou colando o texto. A
 importação confere a estrutura e os erros antes de instalar, e mostra o
@@ -140,6 +176,7 @@ leitura/
   index.html          página do jogo (estilos da lousa, das janelas e do editor)
   app.js              telas Temas e mapa de perguntas, palavras, síntese, menu, importação
   editor.js           mural de estudo (criação)
+  artigo.js           o estudo lido como artigo, para copiar ou baixar
   estudos.js          formato dos estudos, armazenamento, referências em português, validação
   desenho.js          desenho de nós e pistas, posicionamento
   lousa.js            superfície SVG em tela cheia com arrastar e zoom
@@ -147,6 +184,7 @@ leitura/
   shared/base.css     estilos comuns, mobile primeiro, tema claro/escuro
   conteudo/sistema.json   estudos que vêm com o jogo e temas desconhecidos
   conteudo/descanso.json  o estudo Descanso
+  conteudo/cordeiro.json  O Cordeiro, mural de referência quase incompleto
 ```
 
 O progresso de cada estudo, os estudos criados ou importados e o diário

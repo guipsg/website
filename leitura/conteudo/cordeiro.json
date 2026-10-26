@@ -1,0 +1,213 @@
+{
+  "formato": "estudo-biblico",
+  "versao_formato": 5,
+  "id": "cordeiro",
+  "versao": 1,
+  "criado_em": "2026-10-26T00:00:00.000Z",
+  "atualizado_em": "2026-10-26T00:00:00.000Z",
+  "autor": {
+    "nome": "Laboratório de leitura"
+  },
+  "licenca": "CC BY 4.0",
+  "idioma": "pt-BR",
+  "traducao_referencia": "porbr2018",
+  "titulo": "O Cordeiro",
+  "descricao": "Um mural em andamento, deixado quase incompleto de propósito: três notas maduras e cinco em camadas diferentes. Serve de referência para ver como um estudo cresce.",
+  "cor": "#c7685a",
+  "pergunta_central": "Por que a Bíblia volta tantas vezes à imagem de um cordeiro?",
+  "passagens": {
+    "p_provera": {
+      "ref": "Gn 22:1-14",
+      "osis": "Gen.22.1-Gen.22.14"
+    },
+    "p_pascoa": {
+      "ref": "Êx 12:1-13",
+      "osis": "Exod.12.1-Exod.12.13"
+    },
+    "p_calado": {
+      "ref": "Is 53:7",
+      "osis": "Isa.53.7"
+    },
+    "p_eis": {
+      "ref": "Jo 1:29-36",
+      "osis": "John.1.29-John.1.36"
+    },
+    "p_ossos": {
+      "ref": "Jo 19:31-37",
+      "osis": "John.19.31-John.19.37"
+    },
+    "p_trono": {
+      "ref": "Ap 5:1-7",
+      "osis": "Rev.5.1-Rev.5.7"
+    }
+  },
+  "nos": [
+    {
+      "id": "abel",
+      "tipo": "pergunta",
+      "titulo": "",
+      "nota": "Abel já oferecia dos primeiros do rebanho (Gn 4:4). O cordeiro começa antes de Abraão?",
+      "pergunta": "",
+      "passagem": "",
+      "evidencia": [],
+      "revelacao": "",
+      "pistas": [],
+      "pos": {
+        "x": -470,
+        "y": -210
+      }
+    },
+    {
+      "id": "provera",
+      "tipo": "pergunta",
+      "titulo": "Deus proverá",
+      "nota": "Isaque carrega a lenha e faz a pergunta mais óbvia: onde está o cordeiro? Abraão não explica.",
+      "pergunta": "Por que Abraão responde “Deus proverá” em vez de explicar ao filho?",
+      "passagem": "p_provera",
+      "evidencia": [
+        "Gen.22.8",
+        "Gen.22.14"
+      ],
+      "dica": "Gen.22.7-Gen.22.8",
+      "revelacao": "Abraão não tem a resposta, mas confia que ela virá de Deus. O monte ganha o nome de “o Senhor proverá”: a pergunta de Isaque fica de pé, como promessa em aberto, muito depois daquele dia.",
+      "pistas": [
+        {
+          "para": "eis",
+          "tipo": "alusao",
+          "texto": "Isaque perguntou onde estava o cordeiro. Alguém, séculos depois, aponta para um."
+        }
+      ],
+      "pos": {
+        "x": -230,
+        "y": -110
+      }
+    },
+    {
+      "id": "pascoa",
+      "tipo": "pergunta",
+      "titulo": "Sangue na porta",
+      "nota": "Cada casa escolhe um cordeiro sem defeito e passa o sangue nos batentes. Deus diz que vai ver o sangue.",
+      "pergunta": "Por que é o sangue na porta, e não o próprio cordeiro, o sinal que Deus vê?",
+      "passagem": "p_pascoa",
+      "evidencia": [
+        "Exod.12.13"
+      ],
+      "revelacao": "O cordeiro morre, mas o que livra a casa é o sinal que Deus vê. A proteção não depende de quem mora ali ser melhor que o vizinho, e sim de estar debaixo daquele sinal.",
+      "pistas": [
+        {
+          "para": "eis",
+          "tipo": "tema",
+          "texto": "O cordeiro da Páscoa protegia uma casa. E se houvesse um que valesse para todas?"
+        },
+        {
+          "para": "ossos",
+          "tipo": "citacao",
+          "texto": ""
+        }
+      ],
+      "pos": {
+        "x": -230,
+        "y": 150
+      }
+    },
+    {
+      "id": "antes",
+      "tipo": "pergunta",
+      "titulo": "",
+      "nota": "Pedro diz que o cordeiro já era conhecido antes da fundação do mundo (1Pe 1:20). Então Gênesis 22 não foi improviso?",
+      "pergunta": "",
+      "passagem": "",
+      "evidencia": [],
+      "revelacao": "",
+      "pistas": [
+        {
+          "para": "provera",
+          "tipo": "tema",
+          "texto": ""
+        }
+      ],
+      "pos": {
+        "x": -470,
+        "y": 30
+      }
+    },
+    {
+      "id": "calado",
+      "tipo": "pergunta",
+      "titulo": "",
+      "nota": "O servo de Isaías é levado como cordeiro e não abre a boca.",
+      "pergunta": "Por que o servo fica calado diante de quem o fere?",
+      "passagem": "p_calado",
+      "evidencia": [],
+      "revelacao": "",
+      "pistas": [
+        {
+          "para": "eis",
+          "tipo": "alusao",
+          "texto": ""
+        }
+      ],
+      "pos": {
+        "x": 110,
+        "y": -250
+      }
+    },
+    {
+      "id": "eis",
+      "tipo": "pergunta",
+      "titulo": "Eis o Cordeiro",
+      "nota": "João Batista vê Jesus passar e diz “cordeiro”. Para quem conhecia Gênesis 22 e Êxodo 12, essa palavra pesa.",
+      "pergunta": "Por que João apresenta Jesus como cordeiro, e não como rei ou profeta?",
+      "passagem": "p_eis",
+      "evidencia": [
+        "John.1.29",
+        "John.1.36"
+      ],
+      "revelacao": "João junta as duas cenas: o cordeiro que Deus proveria e o cordeiro cujo sinal livra. Mas amplia as duas: não tira o pecado de uma casa ou de um povo, e sim “do mundo”.",
+      "pistas": [
+        {
+          "para": "trono",
+          "tipo": "tema",
+          "texto": ""
+        }
+      ],
+      "pos": {
+        "x": 70,
+        "y": 0
+      }
+    },
+    {
+      "id": "ossos",
+      "tipo": "pergunta",
+      "titulo": "",
+      "nota": "João faz questão de dizer que nenhum osso foi quebrado. Isso é a regra da Páscoa (Êx 12:46).",
+      "pergunta": "Por que o evangelista se importa com um detalhe como os ossos?",
+      "passagem": "p_ossos",
+      "evidencia": [
+        "John.19.36"
+      ],
+      "revelacao": "",
+      "pistas": [],
+      "pos": {
+        "x": 60,
+        "y": 280
+      }
+    },
+    {
+      "id": "trono",
+      "tipo": "pergunta",
+      "titulo": "",
+      "nota": "Anunciam um Leão. Quando João olha, vê um Cordeiro como que morto, mas de pé. O leão é o cordeiro?",
+      "pergunta": "",
+      "passagem": "p_trono",
+      "evidencia": [],
+      "revelacao": "",
+      "pistas": [],
+      "pos": {
+        "x": 340,
+        "y": 40
+      }
+    }
+  ],
+  "palavras": []
+}

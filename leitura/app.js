@@ -197,8 +197,10 @@
       erros
         ? h('p', { class: 'aviso' }, erros === 1 ? `Rascunho: ${problemas[0].msg}` : `Rascunho: ${erros} problemas a resolver no mural antes de jogar.`)
         : h('p', {}, p.visitado ? `${p.resolvidos.length} de ${jogo.nos.length} entendidos${d.palavras.length ? ` · ${palavras} de ${d.palavras.length} palavras` : ''}` : 'Você ainda não começou este estudo.'),
+        d.nos.length > jogo.nos.length && h('p', { class: 'autor' }, `${jogo.nos.length} ${jogo.nos.length === 1 ? 'pergunta pronta' : 'perguntas prontas'} · ${d.nos.length - jogo.nos.length} ${d.nos.length - jogo.nos.length === 1 ? 'nota em andamento' : 'notas em andamento'} no mural`),
       h('div', { class: 'linha' },
-        !erros && h('button', { class: 'btn primary', onclick: () => abrirEstudo(jogo) }, p.visitado ? 'Continuar' : 'Abrir'),
+        !erros && h('button', { class: 'btn primary', onclick: () => abrirEstudo(jogo, { artigo: d }) }, p.visitado ? 'Continuar' : 'Abrir'),
+        h('button', { class: 'btn', onclick: () => Artigo.abrir(d) }, 'Artigo'),
         c.origem === 'meu' ? h('button', { class: 'btn', onclick: editar }, 'Editar') : h('button', { class: 'btn', onclick: duplicar }, 'Duplicar para editar'),
         c.origem !== 'embutido' && h('button', { class: 'btn', onclick: () => excluir(c) }, 'Excluir')),
     );
@@ -224,7 +226,7 @@
   // ======================================================================
   // `chave` separa o progresso (o editor testa com uma chave própria) e
   // `voltar` decide para onde o botão ← leva.
-  function abrirEstudo(data, { chave = data.id, voltar = null } = {}) {
+  function abrirEstudo(data, { chave = data.id, voltar = null, artigo = data } = {}) {
     $('#info').hidden = true;
     const teste = !!voltar;
     const prog = Lab.progress(chave, INICIAL);
@@ -734,21 +736,25 @@
           body: h('p', {}, 'O teste chegou ao fim: todas as perguntas foram entendidas.'),
           actions: [
             { label: 'Continuar no teste', value: null },
+            { label: 'Ler como artigo', value: 'artigo' },
             { label: 'Voltar ao editor', value: true, primary: true },
           ],
         });
+        if (r === 'artigo') await Artigo.abrir(artigo);
         if (r) voltar();
         return;
       }
       const r = await modal({
         title: 'Estudo completo',
-        body: h('p', {}, 'Você chegou ao fim deste estudo. Quer registrar a sessão no diário agora?'),
+        body: h('p', {}, 'Você chegou ao fim. O caminho que você percorreu também pode ser lido de uma vez, como um artigo. Quer registrar a sessão no diário?'),
         actions: [
           { label: 'Continuar explorando', value: null },
+          { label: 'Ler como artigo', value: 'artigo' },
           { label: 'Abrir o diário', value: true, primary: true },
         ],
       });
-      if (r) Lab.endSession('constelacao');
+      if (r === 'artigo') Artigo.abrir(artigo);
+      else if (r) Lab.endSession('constelacao');
     }
 
     function convite() {
